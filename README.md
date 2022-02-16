@@ -32,6 +32,14 @@
 $ npm install
 ```
 
+## Create environment files
+
+Create environment files in config directory based on configurationSchema presented in configuration.ts file.
+Supported environments:
+
+- development.env
+- production.env
+
 ## Running the app
 
 ```bash
