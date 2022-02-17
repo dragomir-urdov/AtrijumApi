@@ -7,7 +7,10 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
+
+import { ApiTags } from '@nestjs/swagger';
 
 // Service
 import { ProductService } from './product.service';
@@ -15,8 +18,12 @@ import { ProductService } from './product.service';
 // DTO
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { Public } from '@auth/guards/public.metadata';
 
+@ApiTags('product')
 @Controller('product')
+@UseGuards(JwtAuthGuard)
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
@@ -26,11 +33,13 @@ export class ProductController {
   }
 
   @Get()
+  @Public()
   findAll() {
     return this.productService.findAll();
   }
 
   @Get(':id')
+  @Public()
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productService.findOne(id);
   }

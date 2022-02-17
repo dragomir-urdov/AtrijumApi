@@ -11,7 +11,9 @@ const config = new DocumentBuilder()
   .setTitle('Atrijum Atelje')
   .setDescription('Simple Atriju Atelje API')
   .setVersion('1.0')
-  .addTag('product')
+  .addTag('product', 'Product management')
+  .addTag('auth', 'Authentication endpoints')
+  .addTag('user', 'User management')
   .build();
 
 async function bootstrap() {
@@ -37,7 +39,11 @@ async function bootstrap() {
 
   await app.listen(port);
 
-  console.log(`App listening on localhost:${port}`);
+  if (process.env.NODE_ENV === 'development') {
+    console.log(
+      `App listening on port ${port}\nVisit API documentation at: http://localhost:${port}/api`,
+    );
+  }
 }
 
 bootstrap();
