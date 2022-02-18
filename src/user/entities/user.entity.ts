@@ -1,13 +1,7 @@
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class User extends BaseEntity {
+export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -23,12 +17,6 @@ export class User extends BaseEntity {
   password: string;
 
   @Column({
-    name: 'last_login_date',
-    type: 'date',
-  })
-  lastLoginDate: Date;
-
-  @Column({
     name: 'first_name',
   })
   firstName: string;
@@ -39,13 +27,9 @@ export class User extends BaseEntity {
   lastName: string;
 
   @Column({
-    name: 'device_id',
-  })
-  deviceId: string;
-
-  @Column({
     name: 'birth_date',
     type: 'date',
+    nullable: true,
   })
   birthDate?: Date;
 }

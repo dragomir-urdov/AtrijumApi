@@ -15,6 +15,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  /**
+   * It validates JWT token.
+   *
+   * @author Dragomir Urdov
+   * @param payload JWT payload data.
+   * @returns User data.
+   */
   async validate(payload: any) {
     return payload;
   }

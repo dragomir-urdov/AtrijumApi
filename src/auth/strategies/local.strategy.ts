@@ -14,6 +14,14 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  /**
+   * It validates user login credentials.
+   *
+   * @author Dragomir Urdov
+   * @param email User email address.
+   * @param password User password.
+   * @returns User data.
+   */
   async validate(email: string, password: string) {
     const user = await this.authService.validateUser(email, password);
 
