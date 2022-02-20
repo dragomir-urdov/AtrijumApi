@@ -1,9 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
-import * as bcrypt from 'bcrypt';
-
-import { FindOneOptions, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 
 import { User } from './entities/user.entity';
 
@@ -14,39 +13,69 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly configService: ConfigService,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const user = new User();
+  /**
+   * It insert new user in database if user not exists.
+   *
+   * @author Dragomir Urdov
+   * @param createUserDto User data.
+   * @returns Stored user data.
+   */
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const newUser = new User();
 
-    if (createUserDto.password !== createUserDto.confirmPassword) {
-      throw new UnauthorizedException();
+    const user = await this.findOne({ where: { email: createUserDto.email } });
+
+    if (user) {
+      throw new HttpException(
+        {
+          error: `User with ${user.email} email address already exists.`,
+          status: HttpStatus.FORBIDDEN,
+        },
+        HttpStatus.FORBIDDEN,
+      );
     }
 
-    const salt = await bcrypt.genSalt(10);
+    newUser.email = createUserDto.email;
+    newUser.password = createUserDto.password;
+    newUser.confirmPassword = createUserDto.confirmPassword;
+    newUser.firstName = createUserDto.firstName;
+    newUser.lastName = createUserDto.lastName;
 
-    console.log(createUserDto, salt);
+    const savedUser = await this.userRepository.save(newUser);
+    delete savedUser.password;
 
-    const hashPassword = await bcrypt.hash(createUserDto.password, salt);
-
-    user.email = createUserDto.email;
-    user.password = hashPassword;
-    user.firstName = createUserDto.firstName;
-    user.lastName = createUserDto.lastName;
-
-    return this.userRepository.save(user);
+    return savedUser;
   }
 
+  /**
+   * It find user from database based on query options.
+   *
+   * @author Dragomir Urdov
+   * @param options Query options.
+   * @param includePassword Get user password.
+   * @returns User data.
+   */
   async findOne(
     options: FindOneOptions<User>,
     includePassword = false,
   ): Promise<User> {
     const user = await this.userRepository.findOne(options);
 
-    if (!includePassword) {
+    if (user && !includePassword) {
       delete user.password;
     }
 
     return user;
+  }
+
+  async update(id: number, user: Partial<User>) {
+    return this.userRepository.update(id, user);
+  }
+
+  async delete(id: number) {
+    return this.userRepository.delete(id);
   }
 }

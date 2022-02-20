@@ -1,11 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-
-import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
 
 import helmet from 'helmet';
+import * as UserAgent from 'express-useragent';
+
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ConfigService } from '@nestjs/config';
+
+import { AppModule } from './app.module';
 
 const config = new DocumentBuilder()
   .setTitle('Atrijum Atelje')
@@ -25,6 +27,9 @@ async function bootstrap() {
   // Protection
   app.use(helmet());
   app.enableCors();
+
+  // User agent
+  app.use(UserAgent.express());
 
   // Global pipes
   app.useGlobalPipes(

@@ -1,40 +1,127 @@
-import { Injectable } from '@nestjs/common';
+import {
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 import * as bcrypt from 'bcrypt';
 
-import { JwtService } from '@nestjs/jwt';
-
 import { UserService } from '@user/user.service';
+import { SharedService } from '@shared/shared.service';
+
+import { User } from '@user/entities/user.entity';
 import { CreateUserDto } from '@user/dto/create-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { Details } from 'express-useragent';
+import { Device, Jwt } from './entities/jwt.entity';
+import { ConfigService } from '@nestjs/config';
+import e from 'express';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(Jwt)
+    private readonly jwtRepository: Repository<Jwt>,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
+  /**
+   * It validates user data.
+   *
+   * @author Dragomir Urdov
+   * @param email User email address.
+   * @param password User password.
+   * @returns User if there is user with specified email address and password match.
+   */
   async validateUser(email: string, password: string) {
-    const user = await this.userService.findOne({ where: { email } }, true);
+    const user = await User.findByEmail(email, true);
     if (user) {
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (isMatch) {
+        delete user.password;
         return user;
+      } else {
+        throw new UnauthorizedException();
       }
     }
 
-    return null;
+    throw new NotFoundException({
+      message: 'User not found',
+      status: HttpStatus.NOT_FOUND,
+    });
   }
 
-  async signup(user: CreateUserDto) {
-    return this.userService.create(user);
+  /**
+   * It creates new user and logged in them automatically.
+   *
+   * @author Dragomir Urdov
+   * @param user User data
+   * @returns
+   */
+  async signup(user: CreateUserDto, userAgent: Details): Promise<LoginUserDto> {
+    const newUser = await this.userService.create(user);
+
+    try {
+      return this.login(newUser, userAgent);
+    } catch (error) {
+      await this.userService.delete(newUser.id);
+      throw new InternalServerErrorException();
+    }
   }
 
-  async login(user: any) {
+  /**
+   * It logged in user issuing new jwt token.
+   *
+   * @author Dragomir Urdov
+   * @param user User data.
+   * @returns Jwt token and user data.
+   */
+  async login(user: User, userAgent: Details): Promise<LoginUserDto> {
     const payload = { email: user.email, id: user.id };
+    const jwtToken = this.jwtService.sign(payload);
+
+    const deviceData = {
+      os: userAgent.os,
+      platform: userAgent.platform,
+      browser: userAgent.browser,
+    } as Device;
+
+    const device = SharedService.encodeBase64(deviceData);
+
+    let token = user.jwtTokens?.find((token) => token.device === device);
+
+    if (token) {
+      token.jwtToken = jwtToken;
+    } else {
+      token = new Jwt();
+      token.device = device;
+      token.jwtToken = jwtToken;
+      token.user = user;
+    }
+
+    try {
+      await this.jwtRepository.save(token);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
+
+    delete user.jwtTokens;
+
     return {
-      jwt_token: this.jwtService.sign(payload),
+      jwt: {
+        token: token.jwtToken,
+        expiresIn: (this.jwtService.decode(jwtToken) as any).exp * 1000 - 10000,
+      },
+      user,
     };
   }
 }

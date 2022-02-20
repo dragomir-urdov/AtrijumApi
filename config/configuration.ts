@@ -10,6 +10,7 @@ export const configuration = () => ({
     name: process.env.DATABASE_NAME,
   },
   jwt: {
+    salt: process.env.SALT,
     secret: process.env.JWT_SECRET,
     expiresIn: process.env.JWT_EXPIRES_IN,
   },
@@ -23,11 +24,14 @@ export const validationSchema = Joi.object({
 
   // Environment file
   PORT: Joi.number().default(3000),
+
   DATABASE_HOST: Joi.string(),
   DATABASE_PORT: Joi.number(),
   DATABASE_USER: Joi.string(),
   DATABASE_PASSWORD: Joi.string().empty('').optional(),
   DATABASE_NAME: Joi.string(),
+
+  SALT: Joi.number().integer(),
   JWT_SECRET: Joi.string(),
   JWT_EXPIRES_IN: Joi.string(),
 });

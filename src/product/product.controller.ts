@@ -8,6 +8,7 @@ import {
   Delete,
   ParseIntPipe,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 
 import { ApiTags } from '@nestjs/swagger';
@@ -20,6 +21,8 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
 import { Public } from '@auth/guards/public.metadata';
+import { Details } from 'express-useragent';
+import { UserAgent } from '@auth/decorators/user-agent.decorator';
 
 @ApiTags('product')
 @Controller('product')
@@ -33,9 +36,9 @@ export class ProductController {
   }
 
   @Get()
-  @Public()
-  findAll() {
-    return this.productService.findAll();
+  // @Public()
+  findAll(@UserAgent() userAgent: Details) {
+    return userAgent;
   }
 
   @Get(':id')

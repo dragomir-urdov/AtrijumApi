@@ -9,6 +9,7 @@ import { configuration, validationSchema } from 'config/configuration';
 import { ProductModule } from '@product/product.module';
 import { AuthModule } from '@auth/auth.module';
 import { UserModule } from '@user/user.module';
+import { SharedModule } from './shared/shared.module';
 
 const modules = [ProductModule, AuthModule, UserModule];
 
@@ -37,6 +38,7 @@ const modules = [ProductModule, AuthModule, UserModule];
       inject: [ConfigService],
     }),
     ...modules,
+    SharedModule,
   ],
 })
 export class AppModule {}
