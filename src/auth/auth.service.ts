@@ -5,6 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,13 +16,13 @@ import * as bcrypt from 'bcrypt';
 import { UserService } from '@user/user.service';
 import { SharedService } from '@shared/shared.service';
 
+import { Details } from 'express-useragent';
+
 import { User } from '@user/entities/user.entity';
+import { Device, Jwt } from './entities/jwt.entity';
+
 import { CreateUserDto } from '@user/dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import { Details } from 'express-useragent';
-import { Device, Jwt } from './entities/jwt.entity';
-import { ConfigService } from '@nestjs/config';
-import e from 'express';
 
 @Injectable()
 export class AuthService {
@@ -89,13 +90,7 @@ export class AuthService {
     const payload = { email: user.email, id: user.id };
     const jwtToken = this.jwtService.sign(payload);
 
-    const deviceData = {
-      os: userAgent.os,
-      platform: userAgent.platform,
-      browser: userAgent.browser,
-    } as Device;
-
-    const device = SharedService.encodeBase64(deviceData);
+    const device = SharedService.encodeUserAgent(userAgent);
 
     let token = user.jwtTokens?.find((token) => token.device === device);
 
@@ -123,5 +118,18 @@ export class AuthService {
       },
       user,
     };
+  }
+
+  async logout(user: User, userAgent: Details) {
+    const device = SharedService.encodeUserAgent(userAgent);
+
+    await this.jwtRepository.delete({
+      device: device,
+      user: user,
+    });
+
+    delete user.jwtTokens;
+
+    return user;
   }
 }
