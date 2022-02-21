@@ -5,21 +5,17 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { I18nService } from 'nestjs-i18n';
-
 import * as bcrypt from 'bcrypt';
 
 import { UserService } from '@user/user.service';
-import { SharedService } from '@shared/shared.service';
+import { SharedService } from '@shared/services/shared.service';
 
 import { Details } from 'express-useragent';
-import { Request } from 'express';
 
 import { User } from '@user/entities/user.entity';
 import { Jwt } from './entities/jwt.entity';
@@ -34,8 +30,7 @@ export class AuthService {
     private readonly jwtRepository: Repository<Jwt>,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly i18n: I18nService,
+    private readonly sharedService: SharedService,
   ) {}
 
   /**
@@ -44,9 +39,10 @@ export class AuthService {
    * @author Dragomir Urdov
    * @param email User email address.
    * @param password User password.
+   * @param lang Language.
    * @returns User if there is user with specified email address and password match.
    */
-  async validateUser(req: Request, email: string, password: string) {
+  async validateUser(email: string, password: string, lang?: string) {
     const user = await User.findByEmail(email, true);
     if (user) {
       const isMatch = await bcrypt.compare(password, user.password);
@@ -59,13 +55,8 @@ export class AuthService {
       }
     }
 
-    const lang =
-      req.headers['accept-language'] ??
-      this.configService.get<string>('lang.default');
-    const message = await this.i18n.translate('error.User Not Found', { lang });
-
     throw new NotFoundException({
-      message: message,
+      message: await this.sharedService.translate('error.User Not Found', lang),
       status: HttpStatus.NOT_FOUND,
     });
   }
@@ -74,7 +65,8 @@ export class AuthService {
    * It creates new user and logged in them automatically.
    *
    * @author Dragomir Urdov
-   * @param user User data
+   * @param user User data.
+   * @param userAgent User device data.
    * @returns
    */
   async signup(user: CreateUserDto, userAgent: Details): Promise<LoginUserDto> {
@@ -97,6 +89,7 @@ export class AuthService {
    * @returns Jwt token and user data.
    */
   async login(user: User, userAgent: Details): Promise<LoginUserDto> {
+    // Create new jwt token.
     const payload = { email: user.email, id: user.id };
     const jwtToken = this.jwtService.sign(payload);
 
@@ -107,6 +100,7 @@ export class AuthService {
     if (token) {
       token.jwtToken = jwtToken;
     } else {
+      // Save token with user and user device data.
       token = new Jwt();
       token.device = device;
       token.jwtToken = jwtToken;
@@ -124,15 +118,24 @@ export class AuthService {
     return {
       jwt: {
         token: token.jwtToken,
-        expiresIn: (this.jwtService.decode(jwtToken) as any).exp * 1000 - 10000,
+        expiresIn: this.jwtExpiresIn(jwtToken),
       },
       user,
     };
   }
 
-  async logout(user: User, userAgent: Details) {
+  /**
+   * It logged user out.
+   *
+   * @author DragomirUrdov
+   * @param user User data.
+   * @param userAgent User device data.
+   * @returns User data
+   */
+  async logout(user: User, userAgent: Details): Promise<User> {
     const device = SharedService.encodeUserAgent(userAgent);
 
+    // Delete saved token for specified device.
     await this.jwtRepository.delete({
       device: device,
       user: user,
@@ -141,5 +144,16 @@ export class AuthService {
     delete user.jwtTokens;
 
     return user;
+  }
+
+  /**
+   * It decode jwt token and get expires in date.
+   *
+   * @author Dragomir Urdov
+   * @param jwtToken Jwt token.
+   * @returns Jwt expires in date in milliseconds.
+   */
+  private jwtExpiresIn(jwtToken: string): number {
+    return (this.jwtService.decode(jwtToken) as any).exp * 1000 - 10000;
   }
 }

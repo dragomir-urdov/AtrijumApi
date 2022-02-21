@@ -19,7 +19,7 @@ import { AuthModule } from '@auth/auth.module';
 import { UserModule } from '@user/user.module';
 import { SharedModule } from './shared/shared.module';
 import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionsFilter } from '@shared/all-exceptions.filter';
+import { AllExceptionsFilter } from '@shared/filters/all-exceptions.filter';
 
 const modules = [ProductModule, AuthModule, UserModule];
 

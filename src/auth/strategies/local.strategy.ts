@@ -6,6 +6,7 @@ import { Strategy } from 'passport-local';
 import { AuthService } from '@auth/auth.service';
 
 import { Request } from 'express';
+import { Headers } from '@shared/models/headers.model';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
@@ -26,7 +27,8 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
    * @returns User data.
    */
   async validate(req: Request, email: string, password: string) {
-    const user = await this.authService.validateUser(req, email, password);
+    const lang = req.headers[Headers.ACCEPT_LANGUAGE];
+    const user = await this.authService.validateUser(email, password, lang);
 
     if (!user) {
       throw new UnauthorizedException();

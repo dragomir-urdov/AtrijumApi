@@ -71,10 +71,24 @@ export class UserService {
     return user;
   }
 
+  /**
+   * It updates user data.
+   *
+   * @author Dragomir Urdov
+   * @param id User id.
+   * @param user New user data.
+   * @returns User data.
+   */
   async update(id: number, user: Partial<User>) {
     return this.userRepository.update(id, user);
   }
 
+  /**
+   * It deletes user.
+   *
+   * @author Dragomir Urdov
+   * @param id User id.
+   */
   async delete(id: number) {
     return this.userRepository.delete(id);
   }
