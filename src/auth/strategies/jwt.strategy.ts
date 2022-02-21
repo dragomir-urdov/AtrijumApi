@@ -8,8 +8,10 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { UserService } from '@user/user.service';
 
+import { JwtPayload } from '@auth/dto/jwt-payload.dto';
+
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly configService: ConfigService,
     private readonly userService: UserService,
@@ -29,14 +31,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @param payload JWT payload data.
    * @returns User data.
    */
-  async validate(req: Request, payload: any) {
+  async validate(req: Request, payload: JwtPayload) {
     const user = await this.userService.findOne({
       where: { id: payload.id },
       relations: ['jwtTokens'],
     });
 
     const includeToken = user?.jwtTokens.find(
-      (token) => token.jwtToken === req.headers.authorization.split(' ')[1],
+      (token) => token.jwtToken === req.headers.authorization?.split(' ')[1],
     );
 
     if (!user || !includeToken) {

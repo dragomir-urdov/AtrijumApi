@@ -14,6 +14,10 @@ export const configuration = () => ({
     secret: process.env.JWT_SECRET,
     expiresIn: process.env.JWT_EXPIRES_IN,
   },
+  lang: {
+    default: process.env.DEFAULT_LANG,
+    supported: process.env.SUPPORTED_LANG.split(' '),
+  },
 });
 
 export const validationSchema = Joi.object({
@@ -34,4 +38,7 @@ export const validationSchema = Joi.object({
   SALT: Joi.number().integer(),
   JWT_SECRET: Joi.string(),
   JWT_EXPIRES_IN: Joi.string(),
+
+  DEFAULT_LANG: Joi.string().default('en'),
+  SUPPORTED_LANG: Joi.string(),
 });

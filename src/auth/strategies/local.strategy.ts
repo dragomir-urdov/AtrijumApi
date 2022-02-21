@@ -5,12 +5,15 @@ import { Strategy } from 'passport-local';
 
 import { AuthService } from '@auth/auth.service';
 
+import { Request } from 'express';
+
 @Injectable()
-export class LocalStrategy extends PassportStrategy(Strategy) {
+export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
   constructor(private readonly authService: AuthService) {
     super({
       usernameField: 'email',
       passwordField: 'password',
+      passReqToCallback: true,
     });
   }
 
@@ -22,8 +25,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
    * @param password User password.
    * @returns User data.
    */
-  async validate(email: string, password: string) {
-    const user = await this.authService.validateUser(email, password);
+  async validate(req: Request, email: string, password: string) {
+    const user = await this.authService.validateUser(req, email, password);
 
     if (!user) {
       throw new UnauthorizedException();

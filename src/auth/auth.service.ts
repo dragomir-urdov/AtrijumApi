@@ -11,15 +11,18 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { I18nService } from 'nestjs-i18n';
+
 import * as bcrypt from 'bcrypt';
 
 import { UserService } from '@user/user.service';
 import { SharedService } from '@shared/shared.service';
 
 import { Details } from 'express-useragent';
+import { Request } from 'express';
 
 import { User } from '@user/entities/user.entity';
-import { Device, Jwt } from './entities/jwt.entity';
+import { Jwt } from './entities/jwt.entity';
 
 import { CreateUserDto } from '@user/dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -32,6 +35,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly i18n: I18nService,
   ) {}
 
   /**
@@ -42,7 +46,7 @@ export class AuthService {
    * @param password User password.
    * @returns User if there is user with specified email address and password match.
    */
-  async validateUser(email: string, password: string) {
+  async validateUser(req: Request, email: string, password: string) {
     const user = await User.findByEmail(email, true);
     if (user) {
       const isMatch = await bcrypt.compare(password, user.password);
@@ -55,8 +59,13 @@ export class AuthService {
       }
     }
 
+    const lang =
+      req.headers['accept-language'] ??
+      this.configService.get<string>('lang.default');
+    const message = await this.i18n.translate('error.User Not Found', { lang });
+
     throw new NotFoundException({
-      message: 'User not found',
+      message: message,
       status: HttpStatus.NOT_FOUND,
     });
   }
@@ -72,6 +81,7 @@ export class AuthService {
     const newUser = await this.userService.create(user);
 
     try {
+      // Automatically login user after signup.
       return this.login(newUser, userAgent);
     } catch (error) {
       await this.userService.delete(newUser.id);
