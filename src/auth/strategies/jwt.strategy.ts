@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 
 import { ConfigService } from '@nestjs/config';
@@ -6,15 +6,16 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { UserService } from '@user/user.service';
+import { AuthService } from '@auth/auth.service';
 
 import { JwtPayload } from '@auth/dto/jwt-payload.dto';
+import { Headers } from '@shared/models/headers.model';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private readonly configService: ConfigService,
-    private readonly userService: UserService,
+    private readonly authService: AuthService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -32,19 +33,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
    * @returns User data.
    */
   async validate(req: Request, payload: JwtPayload) {
-    const user = await this.userService.findOne({
-      where: { id: payload.id },
-      relations: ['jwtTokens'],
-    });
+    const jwt = req.headers.authorization?.split(' ')[1];
+    const lang = req.headers[Headers.ACCEPT_LANGUAGE];
 
-    const includeToken = user?.jwtTokens.find(
-      (token) => token.jwtToken === req.headers.authorization?.split(' ')[1],
-    );
-
-    if (!user || !includeToken) {
-      throw new UnauthorizedException();
-    }
-
-    return user;
+    return await this.authService.validateJwt(jwt, payload, lang);
   }
 }

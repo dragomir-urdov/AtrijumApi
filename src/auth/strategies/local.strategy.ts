@@ -28,12 +28,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
    */
   async validate(req: Request, email: string, password: string) {
     const lang = req.headers[Headers.ACCEPT_LANGUAGE];
-    const user = await this.authService.validateUser(email, password, lang);
 
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-
-    return user;
+    return await this.authService.validateUser(email, password, lang);
   }
 }

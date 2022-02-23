@@ -19,7 +19,7 @@ import { Public } from '@auth/guards/public.metadata';
 // Service
 import { ProductService } from './product.service';
 
-import { Details } from 'express-useragent';
+import { UserAgentData } from '@shared/models/user-agent.model';
 
 // DTO
 import { CreateProductDto } from './dto/create-product.dto';
@@ -37,7 +37,7 @@ export class ProductController {
   }
 
   @Get()
-  findAll(@UserAgent() userAgent: Details) {
+  findAll(@UserAgent() userAgent: UserAgentData) {
     return userAgent;
   }
 

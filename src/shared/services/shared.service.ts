@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { I18nService } from 'nestjs-i18n';
 
 import { Device } from '@auth/entities/jwt.entity';
-import { Details } from 'express-useragent';
+import { UserAgentData } from '@shared/models/user-agent.model';
 
 @Injectable()
 export class SharedService {
@@ -42,7 +42,7 @@ export class SharedService {
    * @param userAgent User device data.
    * @returns Base64 encoded string.
    */
-  static encodeUserAgent(userAgent: Details): string {
+  static encodeUserAgent(userAgent: UserAgentData): string {
     const deviceData = {
       os: userAgent.os,
       platform: userAgent.platform,
