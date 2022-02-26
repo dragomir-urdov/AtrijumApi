@@ -1,5 +1,3 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
-
 import {
   BaseEntity,
   BeforeInsert,
@@ -10,6 +8,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
+
 import { Jwt } from '@auth/entities/jwt.entity';
 
 import * as bcrypt from 'bcrypt';
@@ -29,11 +29,9 @@ export class User extends BaseEntity {
 
   @Column({
     nullable: false,
-    select: false,
   })
+  @Exclude()
   password: string;
-
-  confirmPassword?: string;
 
   @Column({
     name: 'first_name',
@@ -55,40 +53,19 @@ export class User extends BaseEntity {
   @OneToMany(() => Jwt, (jwt) => jwt.user, {
     cascade: true,
   })
+  @Exclude()
   jwtTokens: Jwt[];
 
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {
-    if (this.confirmPassword && this.confirmPassword !== this.password) {
-      throw new HttpException(
-        {
-          error: `Passwords don't match.`,
-          status: HttpStatus.BAD_REQUEST,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    delete this.confirmPassword;
-
     if (this.password) {
       const salt = await bcrypt.genSalt();
       this.password = await bcrypt.hash(this.password, salt);
     }
   }
+}
 
-  static findByEmail(email: string, includePassword = false) {
-    let query = this.createQueryBuilder('user')
-      .where('user.email = :email', {
-        email,
-      })
-      .leftJoinAndSelect('user.jwtTokens', 'jwt');
-
-    if (includePassword) {
-      query = query.addSelect('user.password');
-    }
-
-    return query.getOne();
-  }
+export enum UserRelations {
+  JWT_TOKENS = 'jwtTokens',
 }

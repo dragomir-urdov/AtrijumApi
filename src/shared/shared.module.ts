@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 
-import { SharedService } from './services/shared.service';
+import { SharedService } from '@shared/services/shared.service';
 
 @Global()
 @Module({

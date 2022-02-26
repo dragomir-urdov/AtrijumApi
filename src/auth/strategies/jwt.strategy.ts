@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { Request } from 'express';
-
 import { ConfigService } from '@nestjs/config';
 
 import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { ExtractJwt, Strategy, StrategyOptions } from 'passport-jwt';
 
+// Service
 import { AuthService } from '@auth/auth.service';
 
-import { JwtPayload } from '@auth/dto/jwt-payload.dto';
+// Models
+import { Request } from 'express';
 import { Headers } from '@shared/models/headers.model';
+import { JwtPayload } from '@auth/models/jwt.model';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -22,7 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       ignoreExpiration: false,
       secretOrKey: configService.get<string>('jwt.secret'),
       passReqToCallback: true,
-    });
+    } as StrategyOptions);
   }
 
   /**
@@ -33,7 +34,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
    * @returns User data.
    */
   async validate(req: Request, payload: JwtPayload) {
-    const jwt = req.headers.authorization?.split(' ')[1];
+    const jwt =
+      req.headers.authorization?.split(' ')[1] ?? req.headers.authorization;
     const lang = req.headers[Headers.ACCEPT_LANGUAGE];
 
     return await this.authService.validateJwt(jwt, payload, lang);

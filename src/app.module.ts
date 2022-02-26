@@ -17,11 +17,12 @@ import { configuration, validationSchema } from 'config/configuration';
 import { ProductModule } from '@product/product.module';
 import { AuthModule } from '@auth/auth.module';
 import { UserModule } from '@user/user.module';
-import { SharedModule } from './shared/shared.module';
+import { SharedModule } from '@shared/shared.module';
+
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from '@shared/filters/all-exceptions.filter';
 
-const modules = [ProductModule, AuthModule, UserModule];
+const modules = [SharedModule, UserModule, AuthModule, ProductModule];
 
 @Module({
   imports: [
@@ -69,7 +70,6 @@ const modules = [ProductModule, AuthModule, UserModule];
     }),
 
     // ** Other modules **
-    SharedModule,
     ...modules,
   ],
   providers: [

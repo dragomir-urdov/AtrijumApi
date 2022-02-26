@@ -1,5 +1,5 @@
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import helmet from 'helmet';
@@ -12,10 +12,11 @@ import { AppModule } from './app.module';
 const config = new DocumentBuilder()
   .setTitle('Atrijum Atelje')
   .setDescription('Simple Atriju Atelje API')
-  .setVersion('1.0')
-  .addTag('product', 'Product management')
-  .addTag('auth', 'Authentication endpoints')
   .addTag('user', 'User management')
+  .addTag('auth', 'Authentication endpoints')
+  .addTag('product', 'Product management')
+  .setVersion('1.0')
+  .addBearerAuth()
   .build();
 
 async function bootstrap() {
@@ -38,6 +39,10 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
+
+  // Global Interceptors
+  const reflector = app.get(Reflector);
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port', 3000);

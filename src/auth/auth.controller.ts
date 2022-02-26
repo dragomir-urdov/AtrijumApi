@@ -1,42 +1,112 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 
-import { ApiTags } from '@nestjs/swagger';
-import { UserData } from './decorators/user.decorator';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
-import { AuthService } from './auth.service';
+// Decorators
+import {
+  UserAgent,
+  UserAgentData,
+} from '@auth/decorators/user-agent.decorator';
+import { UserData } from '@auth/decorators/user.decorator';
 
-import { LocalAuthGuard } from './guards/local-auth.guard';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+// Services
+import { AuthService } from '@auth/auth.service';
 
-import { CreateUserDto } from '@user/dto/create-user.dto';
+// Auth
+import { LocalAuthGuard } from '@auth/guards/local-auth.guard';
+import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
 
+// Entities
 import { User } from '@user/entities/user.entity';
 
-import { UserAgent } from './decorators/user-agent.decorator';
-import { UserAgentData } from '@shared/models/user-agent.model';
+// DTO
+import {
+  BadRequestExceptionDto,
+  ForbiddenExceptionDto,
+  NotFoundExceptionDto,
+  UnauthorizedExceptionDto,
+} from '@shared/dto/exception.dto';
+import { SuccessDto } from '@shared/dto/success.dto';
+import { UserCreateDto, UserResDto, UserLoginDto } from '@user/dto/user.dto';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('signup')
+  @Post('signup') // -----------------------------------------------------------
+  @ApiBody({ type: UserCreateDto })
+  @ApiCreatedResponse({ type: UserResDto, description: 'New user data.' })
+  @ApiForbiddenResponse({
+    type: ForbiddenExceptionDto,
+    description: 'If user already exists',
+  })
+  @ApiBadRequestResponse({
+    type: BadRequestExceptionDto,
+    description: 'Wrong data like password and confirm password mismatches',
+  })
   async signup(
-    @Body() user: CreateUserDto,
+    @Body() user: UserCreateDto,
     @UserAgent() userAgent: UserAgentData,
-  ) {
+  ): Promise<UserResDto> {
+    console.log(user, userAgent);
+
     return this.authService.signup(user, userAgent);
   }
 
-  @Post('login')
+  @Post('login') // ------------------------------------------------------------
+  @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
-  async login(@UserData() user: User, @UserAgent() userAgent: UserAgentData) {
+  @ApiBody({
+    type: UserLoginDto,
+    description: 'Existing user email and password.',
+  })
+  @ApiOkResponse({
+    type: UserLoginDto,
+    description: 'User successively logged in.',
+  })
+  @ApiNotFoundResponse({
+    type: NotFoundExceptionDto,
+    description: 'User with specified email address do not exists.',
+  })
+  @ApiUnauthorizedResponse({
+    type: UnauthorizedExceptionDto,
+    description: 'Wrong credentials.',
+  })
+  async login(
+    @UserData() user: User,
+    @UserAgent() userAgent: UserAgentData,
+  ): Promise<UserResDto> {
     return this.authService.login(user, userAgent);
   }
 
-  @Post('logout')
+  @Post('logout') // -----------------------------------------------------------
+  @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  async logout(@UserData() user: User, @UserAgent() userAgent: UserAgentData) {
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: SuccessDto })
+  @ApiUnauthorizedResponse({ type: UnauthorizedExceptionDto })
+  async logout(
+    @UserData() user: User,
+    @UserAgent() userAgent: UserAgentData,
+  ): Promise<SuccessDto> {
     return this.authService.logout(user, userAgent);
   }
 }

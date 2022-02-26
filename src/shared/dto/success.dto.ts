@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class JwtTokenDto {
+export class SuccessDto {
   @ApiProperty()
-  token: string;
+  status: number;
 
   @ApiProperty()
-  expiresIn: Date;
+  message: string;
 }

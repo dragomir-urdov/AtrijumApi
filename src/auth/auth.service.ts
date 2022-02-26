@@ -7,31 +7,34 @@ import {
 } from '@nestjs/common';
 
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
 import * as bcrypt from 'bcrypt';
 
+// Services
 import { UserService } from '@user/user.service';
 import { SharedService } from '@shared/services/shared.service';
 
-import { UserAgentData } from '@shared/models/user-agent.model';
+// Decorators
+import { UserAgentData } from '@auth/decorators/user-agent.decorator';
 
-import { User } from '@user/entities/user.entity';
+// Entities
+import { User, UserRelations } from '@user/entities/user.entity';
 import { Jwt } from '@auth/entities/jwt.entity';
 
-import { CreateUserDto } from '@user/dto/create-user.dto';
-import { LoginUserDto } from '@auth/dto/login-user.dto';
-import { JwtPayload } from '@auth/dto/jwt-payload.dto';
+// Models
+import { UpdateResult } from 'typeorm';
+import { JwtPayload } from '@auth/models/jwt.model';
+
+// DTO
+import { UserCreateDto, UserResDto } from '@user/dto/user.dto';
+import { SuccessDto } from '@shared/dto/success.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(Jwt)
-    private readonly jwtRepository: Repository<Jwt>,
+    private readonly sharedService: SharedService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    private readonly sharedService: SharedService,
   ) {}
 
   /**
@@ -41,11 +44,17 @@ export class AuthService {
    * @param email User email address.
    * @param password User password.
    * @param lang Language.
-   * @returns User if there is user with specified email address and password match.
+   * @returns User data.
    */
-  async validateUser(email: string, password: string, lang?: string) {
-    const user = await User.findByEmail(email, true);
-
+  async validateUser(
+    email: string,
+    password: string,
+    lang?: string,
+  ): Promise<User> {
+    const user = await User.findOne({
+      where: { email },
+      relations: [UserRelations.JWT_TOKENS],
+    });
     if (!user) {
       throw new NotFoundException({
         message: await this.sharedService.translate(
@@ -59,7 +68,6 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (isMatch) {
-      delete user.password;
       return user;
     } else {
       throw new UnauthorizedException();
@@ -74,10 +82,14 @@ export class AuthService {
    * @param payload Jwt payload.
    * @returns User data.
    */
-  async validateJwt(jwt: string, payload: JwtPayload, lang: string) {
+  async validateJwt(
+    jwt: string,
+    payload: JwtPayload,
+    lang: string,
+  ): Promise<User> {
     const user = await this.userService.findOne({
       where: { id: payload.id },
-      relations: ['jwtTokens'],
+      relations: [UserRelations.JWT_TOKENS],
     });
 
     if (!user) {
@@ -107,12 +119,12 @@ export class AuthService {
    * @author Dragomir Urdov
    * @param user User data.
    * @param userAgent User device data.
-   * @returns
+   * @returns Jwt token and user data.
    */
   async signup(
-    user: CreateUserDto,
+    user: UserCreateDto,
     userAgent: UserAgentData,
-  ): Promise<LoginUserDto> {
+  ): Promise<UserResDto> {
     const newUser = await this.userService.create(user);
 
     try {
@@ -135,12 +147,11 @@ export class AuthService {
    *
    * @author Dragomir Urdov
    * @param user User data.
+   * @param userAgent User device data.
    * @returns Jwt token and user data.
    */
-  async login(user: User, userAgent: UserAgentData): Promise<LoginUserDto> {
+  async login(user: User, userAgent: UserAgentData): Promise<UserResDto> {
     const jwtToken = await this.issueJwtToken(user, userAgent);
-
-    delete user.jwtTokens;
 
     return {
       jwt: {
@@ -159,38 +170,21 @@ export class AuthService {
    * @param userAgent User device data.
    * @returns User data
    */
-  async logout(user: User, userAgent: UserAgentData): Promise<User> {
+  async logout(user: User, userAgent: UserAgentData): Promise<SuccessDto> {
     const device = SharedService.encodeUserAgent(userAgent);
 
     // Delete saved token for specified device.
-    await this.jwtRepository.delete({
+    const res = await Jwt.delete({
       device: device,
       user: user,
     });
 
-    delete user.jwtTokens;
-
-    return user;
-  }
-
-  /**
-   * It updates user password.
-   *
-   * @author Dragomir Urdov
-   * @param user User data
-   * @param newPassword New user password.
-   * @param confirmNewPassword Uew user password confirmation.
-   * @returns
-   */
-  async resetPassword(
-    user: User,
-    newPassword: string,
-    confirmNewPassword: string,
-  ) {
-    return this.userService.update(user.id, {
-      password: newPassword,
-      confirmPassword: confirmNewPassword,
-    });
+    if (res.affected) {
+      return {
+        status: HttpStatus.OK,
+        message: 'Successfully logged out.',
+      };
+    }
   }
 
   /**
@@ -221,7 +215,7 @@ export class AuthService {
     }
 
     try {
-      await this.jwtRepository.save(token);
+      await Jwt.save(token);
     } catch (error) {
       throw new InternalServerErrorException();
     }
@@ -236,7 +230,11 @@ export class AuthService {
    * @param jwtToken Jwt token.
    * @returns Jwt expires in date in milliseconds.
    */
-  private jwtExpiresIn(jwtToken: string): number {
-    return (this.jwtService.decode(jwtToken) as any).exp * 1000 - 10000;
+  private jwtExpiresIn(jwtToken: string): Date {
+    const expiresOffset = 10000;
+    const expiresIn =
+      (this.jwtService.decode(jwtToken) as JwtPayload).exp * 1000;
+
+    return new Date(expiresIn - expiresOffset);
   }
 }

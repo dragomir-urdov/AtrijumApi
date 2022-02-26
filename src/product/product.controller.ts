@@ -10,20 +10,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
-import { UserAgent } from '@auth/decorators/user-agent.decorator';
+//  Auth
 import { Public } from '@auth/guards/public.metadata';
+import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
 
 // Service
-import { ProductService } from './product.service';
-
-import { UserAgentData } from '@shared/models/user-agent.model';
+import { ProductService } from '@product/product.service';
 
 // DTO
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateProductDto } from '@product/dto/create-product.dto';
+import { UpdateProductDto } from '@product/dto/update-product.dto';
 
 @ApiTags('product')
 @Controller('product')
@@ -31,23 +29,26 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  @Post()
+  @Post() //--------------------------------------------------------------------
+  @ApiBearerAuth()
   create(@Body() createProductDto: CreateProductDto) {
     return this.productService.create(createProductDto);
   }
 
-  @Get()
-  findAll(@UserAgent() userAgent: UserAgentData) {
-    return userAgent;
+  @Get() //---------------------------------------------------------------------
+  @Public()
+  findAll() {
+    return this.productService.findAll();
   }
 
-  @Get(':id')
+  @Get(':id') //----------------------------------------------------------------
   @Public()
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch(':id') //--------------------------------------------------------------
+  @ApiBearerAuth()
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProductDto: UpdateProductDto,
@@ -55,7 +56,8 @@ export class ProductController {
     return this.productService.update(id, updateProductDto);
   }
 
-  @Delete(':id')
+  @Delete(':id') //-------------------------------------------------------------
+  @ApiBearerAuth()
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.productService.remove(id);
   }

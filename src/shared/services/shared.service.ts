@@ -3,8 +3,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { I18nService } from 'nestjs-i18n';
 
-import { Device } from '@auth/entities/jwt.entity';
-import { UserAgentData } from '@shared/models/user-agent.model';
+import { UserAgentData } from '@auth/decorators/user-agent.decorator';
 
 @Injectable()
 export class SharedService {
@@ -47,7 +46,7 @@ export class SharedService {
       os: userAgent.os,
       platform: userAgent.platform,
       browser: userAgent.browser,
-    } as Device;
+    } as UserAgentData;
     return this.encodeBase64(deviceData);
   }
 

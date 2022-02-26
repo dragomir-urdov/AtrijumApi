@@ -1,10 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 
+// Services
 import { AuthService } from '@auth/auth.service';
 
+// Models
 import { Request } from 'express';
 import { Headers } from '@shared/models/headers.model';
 

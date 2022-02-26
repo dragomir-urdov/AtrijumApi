@@ -1,20 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindOneOptions, Repository } from 'typeorm';
+import { FindOneOptions } from 'typeorm';
 
-import { User } from './entities/user.entity';
+// Entities
+import { User } from '@user/entities/user.entity';
 
-import { CreateUserDto } from './dto/create-user.dto';
+// DTO
+import { UserCreateDto } from '@user/dto/user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly configService: ConfigService) {}
 
   /**
    * It insert new user in database if user not exists.
@@ -23,7 +20,7 @@ export class UserService {
    * @param createUserDto User data.
    * @returns Stored user data.
    */
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: UserCreateDto): Promise<User> {
     const newUser = new User();
 
     const user = await this.findOne({ where: { email: createUserDto.email } });
@@ -40,12 +37,10 @@ export class UserService {
 
     newUser.email = createUserDto.email;
     newUser.password = createUserDto.password;
-    newUser.confirmPassword = createUserDto.confirmPassword;
     newUser.firstName = createUserDto.firstName;
     newUser.lastName = createUserDto.lastName;
 
-    const savedUser = await this.userRepository.save(newUser);
-    delete savedUser.password;
+    const savedUser = await User.save(newUser);
 
     return savedUser;
   }
@@ -58,15 +53,8 @@ export class UserService {
    * @param includePassword Get user password.
    * @returns User data.
    */
-  async findOne(
-    options: FindOneOptions<User>,
-    includePassword = false,
-  ): Promise<User> {
-    const user = await this.userRepository.findOne(options);
-
-    if (user && !includePassword) {
-      delete user.password;
-    }
+  async findOne(options: FindOneOptions<User>): Promise<User> {
+    const user = await User.findOne(options);
 
     return user;
   }
@@ -80,7 +68,7 @@ export class UserService {
    * @returns User data.
    */
   async update(id: number, user: Partial<User>) {
-    return this.userRepository.update(id, user);
+    return User.update(id, user);
   }
 
   /**
@@ -90,6 +78,6 @@ export class UserService {
    * @param id User id.
    */
   async delete(id: number) {
-    return this.userRepository.delete(id);
+    return User.delete(id);
   }
 }
