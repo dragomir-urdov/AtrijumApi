@@ -22,7 +22,6 @@ import { User, UserRelations } from '@user/entities/user.entity';
 import { Jwt } from '@auth/entities/jwt.entity';
 
 // Models
-import { UpdateResult } from 'typeorm';
 import { JwtPayload } from '@auth/models/jwt.model';
 
 // DTO
@@ -170,13 +169,16 @@ export class AuthService {
    * @param userAgent User device data.
    * @returns User data
    */
-  async logout(user: User, userAgent: UserAgentData): Promise<SuccessDto> {
-    const device = SharedService.encodeUserAgent(userAgent);
-
+  async logout(
+    user: User,
+    { os, platform, browser }: UserAgentData,
+  ): Promise<SuccessDto> {
     // Delete saved token for specified device.
     const res = await Jwt.delete({
-      device: device,
-      user: user,
+      os,
+      platform,
+      browser,
+      user,
     });
 
     if (res.affected) {
@@ -196,20 +198,26 @@ export class AuthService {
    */
   private async issueJwtToken(
     user: User,
-    userAgent: UserAgentData,
+    { os, platform, browser }: UserAgentData,
   ): Promise<string> {
     const payload = { email: user.email, id: user.id } as JwtPayload;
     const jwtToken = await this.jwtService.signAsync(payload);
 
-    const device = SharedService.encodeUserAgent(userAgent);
-    let token = user.jwtTokens?.find((token) => token.device === device);
+    let token = user.jwtTokens?.find(
+      (token) =>
+        token.os === os &&
+        token.platform === platform &&
+        token.browser === browser,
+    );
 
     if (token) {
       token.jwtToken = jwtToken;
     } else {
       // Save token with user and user device data.
       token = new Jwt();
-      token.device = device;
+      token.os = os;
+      token.platform = platform;
+      token.browser = browser;
       token.jwtToken = jwtToken;
       token.user = user;
     }

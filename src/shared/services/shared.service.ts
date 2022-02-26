@@ -3,8 +3,6 @@ import { ConfigService } from '@nestjs/config';
 
 import { I18nService } from 'nestjs-i18n';
 
-import { UserAgentData } from '@auth/decorators/user-agent.decorator';
-
 @Injectable()
 export class SharedService {
   constructor(
@@ -32,22 +30,6 @@ export class SharedService {
    */
   static decodeBase64<T>(base64: string): T {
     return JSON.parse(Buffer.from(base64, 'base64').toString('utf-8')) as T;
-  }
-
-  /**
-   * It encode user agent data to Base64 string.
-   *
-   * @author Dragomir Urdov
-   * @param userAgent User device data.
-   * @returns Base64 encoded string.
-   */
-  static encodeUserAgent(userAgent: UserAgentData): string {
-    const deviceData = {
-      os: userAgent.os,
-      platform: userAgent.platform,
-      browser: userAgent.browser,
-    } as UserAgentData;
-    return this.encodeBase64(deviceData);
   }
 
   /**

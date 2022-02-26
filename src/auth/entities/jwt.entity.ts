@@ -4,12 +4,15 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
+
 import { User } from '@user/entities/user.entity';
 
 @Entity({
   name: 'user_jwt',
 })
+@Unique('device', ['os', 'platform', 'browser', 'user'])
 export class Jwt extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -22,19 +25,23 @@ export class Jwt extends BaseEntity {
   jwtToken: string;
 
   @Column({
-    update: false,
     nullable: false,
-    name: 'device',
-    type: 'varchar',
+    update: false,
   })
-  device: string;
+  os: string;
+
+  @Column({
+    nullable: false,
+    update: false,
+  })
+  platform: string;
+
+  @Column({
+    nullable: false,
+    update: false,
+  })
+  browser: string;
 
   @ManyToOne(() => User, (user) => user.jwtTokens, { onDelete: 'CASCADE' })
   user: User;
-}
-
-export class Device {
-  os: string;
-  platform: string;
-  browser: string;
 }
