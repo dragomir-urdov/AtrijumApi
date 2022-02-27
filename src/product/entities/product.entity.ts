@@ -1,4 +1,15 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+
+import { ProductTranslation } from '@product/entities/product-translation.entity';
+import { ProductVariant } from '@product/entities/product-variant.entity';
+import { ProductCollection } from './product-collection.entity';
 
 @Entity()
 export class Product extends BaseEntity {
@@ -15,9 +26,18 @@ export class Product extends BaseEntity {
   })
   title: string;
 
-  @Column({
-    nullable: true,
-    type: 'text',
-  })
-  description?: string;
+  @OneToMany(
+    () => ProductTranslation,
+    (translation) => translation.descriptions,
+  )
+  description?: ProductTranslation;
+
+  @Column()
+  details: string;
+
+  @ManyToMany(() => ProductCollection, (collection) => collection.products)
+  collections: ProductCollection[];
+
+  @OneToMany(() => ProductVariant, (variant) => variant.products)
+  variant: ProductVariant;
 }
