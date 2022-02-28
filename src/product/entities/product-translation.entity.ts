@@ -7,7 +7,6 @@ import {
 } from 'typeorm';
 
 import { Language } from '@shared/entities/language.entity';
-import { Product } from './product.entity';
 
 @Entity()
 export class ProductTranslation extends BaseEntity {
@@ -21,7 +20,4 @@ export class ProductTranslation extends BaseEntity {
     type: 'text',
   })
   text: string;
-
-  @ManyToOne(() => Product, (product) => product.description)
-  descriptions: Product[];
 }

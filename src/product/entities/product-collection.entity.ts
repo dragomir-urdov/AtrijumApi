@@ -2,11 +2,11 @@ import {
   BaseEntity,
   Column,
   Entity,
-  JoinTable,
-  ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Product } from './product.entity';
+
+import { Product } from '@product/entities';
 
 @Entity()
 export class ProductCollection extends BaseEntity {
@@ -15,17 +15,16 @@ export class ProductCollection extends BaseEntity {
 
   @Column({
     type: 'varchar',
+    length: 100,
   })
   title: string;
 
   @Column({
     type: 'text',
+    nullable: true,
   })
-  description: string;
+  description?: string;
 
-  @ManyToMany(() => Product, (product) => product.collections)
-  @JoinTable({
-    name: 'product_collection_products',
-  })
+  @OneToMany(() => Product, (product) => product.collections)
   products!: Product[];
 }

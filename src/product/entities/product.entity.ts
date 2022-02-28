@@ -1,21 +1,20 @@
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
   Entity,
-  ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
-import { ProductTranslation } from '@product/entities/product-translation.entity';
-import { ProductVariant } from '@product/entities/product-variant.entity';
-import { ProductCollection } from './product-collection.entity';
+import { ProductVariant, ProductCollection } from '@product/entities';
+import { User } from '@user/entities/user.entity';
 
 @Entity()
 export class Product extends BaseEntity {
-  @PrimaryGeneratedColumn({
-    type: 'int',
-  })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({
@@ -26,18 +25,31 @@ export class Product extends BaseEntity {
   })
   title: string;
 
-  @OneToMany(
-    () => ProductTranslation,
-    (translation) => translation.descriptions,
-  )
-  description?: ProductTranslation;
+  @Column({
+    type: 'text',
+    nullable: true,
+  })
+  description?: string;
 
   @Column()
   details: string;
 
-  @ManyToMany(() => ProductCollection, (collection) => collection.products)
-  collections: ProductCollection[];
+  @CreateDateColumn({
+    name: 'created_at',
+  })
+  createdAt: Date;
 
-  @OneToMany(() => ProductVariant, (variant) => variant.products)
-  variant: ProductVariant;
+  @UpdateDateColumn({
+    name: 'updated_at',
+  })
+  updatedAt: Date;
+
+  @ManyToOne(() => User, (user) => user.products)
+  user: User;
+
+  @ManyToOne(() => ProductCollection, (collection) => collection.products)
+  collections: ProductCollection;
+
+  @OneToMany(() => ProductVariant, (variant) => variant.product)
+  variants: ProductVariant[];
 }

@@ -1,27 +1,18 @@
-import {
-  BaseEntity,
-  Column,
-  ManyToOne,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-
-import { ProductVariant } from '@product/entities/product-variant.entity';
-import { ProductVariantImage } from './product-variant-image.entity';
+import { BaseEntity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 export abstract class ProductVariantBase extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 100,
+  })
   title: string;
 
-  @Column()
-  description: string;
-
-  @ManyToOne(() => ProductVariantImage, (image) => image.variant)
-  images: ProductVariantImage[];
-
-  @OneToOne(() => ProductVariant)
-  variant: ProductVariant;
+  @Column({
+    type: 'text',
+    nullable: true,
+  })
+  description?: string;
 }

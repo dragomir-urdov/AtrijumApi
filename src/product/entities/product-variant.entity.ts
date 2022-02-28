@@ -1,39 +1,54 @@
 import {
   BaseEntity,
+  Column,
   Entity,
-  JoinColumn,
   ManyToOne,
-  OneToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 
-import { Product } from '@product/entities/product.entity';
-import { ProductVariantShape } from '@product/entities/variants/product-variant-shape.entity';
-import { ProductVariantStone } from '@product/entities/variants/product-variant-stone.entity';
-import { ProductVariantMetal } from '@product/entities/variants/product-variant-metal.entity';
-import { ProductVariantStyle } from '@product/entities/variants/product-variant-style.entity';
+import {
+  Product,
+  ProductMetalVariant,
+  ProductStoneVariant,
+  ProductStyle,
+  ProductShape,
+} from '@product/entities';
+import { ProductImage } from './product-image.entity';
 
 @Entity()
+@Unique('unique_product_variant', [
+  'product',
+  'metal',
+  'stone',
+  'style',
+  'shape',
+])
 export class ProductVariant extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Product, (products) => products.variant)
-  products!: Product[];
+  @Column({
+    type: 'float',
+  })
+  price: number;
 
-  @OneToOne(() => ProductVariantShape)
-  @JoinColumn()
-  shape!: ProductVariantShape;
+  @OneToMany(() => ProductImage, (image) => image.variant)
+  images: ProductImage[];
 
-  @OneToOne(() => ProductVariantStone)
-  @JoinColumn()
-  stone!: ProductVariantStone;
+  @ManyToOne(() => Product, (products) => products.variants)
+  product: Product;
 
-  @OneToOne(() => ProductVariantStyle)
-  @JoinColumn()
-  style!: ProductVariantStyle;
+  @ManyToOne(() => ProductMetalVariant, (metal) => metal.variants)
+  metal: ProductMetalVariant;
 
-  @OneToOne(() => ProductVariantMetal)
-  @JoinColumn()
-  metal!: ProductVariantMetal;
+  @ManyToOne(() => ProductStoneVariant, (metal) => metal.variants)
+  stone: ProductStoneVariant;
+
+  @ManyToOne(() => ProductStyle, (style) => style.variants)
+  style: ProductStyle;
+
+  @ManyToOne(() => ProductShape, (shape) => shape.variants)
+  shape: ProductShape;
 }

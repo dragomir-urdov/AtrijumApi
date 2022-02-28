@@ -20,8 +20,7 @@ import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
 import { ProductService } from '@product/product.service';
 
 // DTO
-import { CreateProductDto } from '@product/dto/create-product.dto';
-import { UpdateProductDto } from '@product/dto/update-product.dto';
+import { CreateProductDto, UpdateProductDto } from '@product/dto';
 
 @ApiTags('product')
 @Controller('product')

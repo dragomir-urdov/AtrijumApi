@@ -11,6 +11,7 @@ import {
 import { Exclude } from 'class-transformer';
 
 import { Jwt } from '@auth/entities/jwt.entity';
+import { Product } from '@product/entities';
 
 import * as bcrypt from 'bcrypt';
 
@@ -55,6 +56,9 @@ export class User extends BaseEntity {
   })
   @Exclude()
   jwtTokens: Jwt[];
+
+  @OneToMany(() => Product, (product) => product.user)
+  products: Product[];
 
   @BeforeInsert()
   @BeforeUpdate()
