@@ -15,9 +15,13 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 //  Auth
 import { Public } from '@auth/guards/public.metadata';
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { UserData } from '@auth/decorators/user.decorator';
 
 // Service
-import { ProductService } from '@product/product.service';
+import { ProductService } from '@product/services/product.service';
+
+// Entities
+import { User } from '@user/entities/user.entity';
 
 // DTO
 import { CreateProductDto, UpdateProductDto } from '@product/dto';
@@ -30,14 +34,14 @@ export class ProductController {
 
   @Post() //--------------------------------------------------------------------
   @ApiBearerAuth()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  create(@UserData() user: User, @Body() createProductDto: CreateProductDto) {
+    return this.productService.createProduct(createProductDto, user);
   }
 
   @Get() //---------------------------------------------------------------------
   @Public()
-  findAll() {
-    return this.productService.findAll();
+  findAllProducts() {
+    return this.productService.findAllProducts();
   }
 
   @Get(':id') //----------------------------------------------------------------

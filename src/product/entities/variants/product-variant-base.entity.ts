@@ -7,6 +7,7 @@ export abstract class ProductVariantBase extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 100,
+    unique: true,
   })
   title: string;
 

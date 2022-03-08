@@ -37,7 +37,9 @@ export class ProductVariant extends BaseEntity {
   @OneToMany(() => ProductImage, (image) => image.variant)
   images: ProductImage[];
 
-  @ManyToOne(() => Product, (products) => products.variants)
+  @ManyToOne(() => Product, (products) => products.variants, {
+    onDelete: 'CASCADE',
+  })
   product: Product;
 
   @ManyToOne(() => ProductMetalVariant, (metal) => metal.variants)
@@ -47,8 +49,8 @@ export class ProductVariant extends BaseEntity {
   stone: ProductStoneVariant;
 
   @ManyToOne(() => ProductStyle, (style) => style.variants)
-  style: ProductStyle;
+  style: ProductStyle | number;
 
   @ManyToOne(() => ProductShape, (shape) => shape.variants)
-  shape: ProductShape;
+  shape: ProductShape | number;
 }

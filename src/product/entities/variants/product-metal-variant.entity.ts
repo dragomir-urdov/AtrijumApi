@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Column,
   Entity,
   ManyToOne,
@@ -9,7 +10,7 @@ import {
 import { ProductVariant, ProductMetal } from '@product/entities';
 
 @Entity()
-export class ProductMetalVariant {
+export class ProductMetalVariant extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -28,5 +29,5 @@ export class ProductMetalVariant {
   metal: ProductMetal;
 
   @OneToMany(() => ProductVariant, (variant) => variant.metal)
-  variants: ProductVariant[];
+  variants?: ProductVariant[];
 }

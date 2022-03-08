@@ -25,6 +25,6 @@ export class ProductCollection extends BaseEntity {
   })
   description?: string;
 
-  @OneToMany(() => Product, (product) => product.collections)
+  @OneToMany(() => Product, (product) => product.collection)
   products!: Product[];
 }

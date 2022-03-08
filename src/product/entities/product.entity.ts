@@ -31,8 +31,8 @@ export class Product extends BaseEntity {
   })
   description?: string;
 
-  @Column()
-  details: string;
+  @Column({ nullable: true })
+  details?: string;
 
   @CreateDateColumn({
     name: 'created_at',
@@ -48,8 +48,29 @@ export class Product extends BaseEntity {
   user: User;
 
   @ManyToOne(() => ProductCollection, (collection) => collection.products)
-  collections: ProductCollection;
+  collection: ProductCollection;
 
-  @OneToMany(() => ProductVariant, (variant) => variant.product)
+  @OneToMany(() => ProductVariant, (variant) => variant.product, {
+    cascade: true,
+  })
   variants: ProductVariant[];
 }
+
+export enum ProductRelations {
+  VARIANTS = 'variants',
+  VARIANTS_METAL = 'variants.metal',
+  VARIANTS_STYLE = 'variants.style',
+  VARIANTS_STONE = 'variants.stone',
+  VARIANTS_SHAPE = 'variants.shape',
+  COLLECTION = 'collection',
+  USER = 'user',
+}
+
+export const ALL_PRODUCT_RELATIONS = Object.values(ProductRelations);
+export const ALL_PRODUCT_VARIANTS = [
+  ProductRelations.VARIANTS,
+  ProductRelations.VARIANTS_METAL,
+  ProductRelations.VARIANTS_SHAPE,
+  ProductRelations.VARIANTS_STONE,
+  ProductRelations.VARIANTS_STYLE,
+];
