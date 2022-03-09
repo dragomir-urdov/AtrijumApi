@@ -7,19 +7,20 @@ import {
 } from '@sendgrid/mail';
 
 import { Environment } from '@shared/models/environment.model';
+import { ConfigKey } from 'config/configuration';
 
 @Injectable()
 export class MailService {
   sendgridService = new SendgridService();
 
-  environment = this.configService.get<Environment>('environment');
+  environment = this.configService.get<Environment>(ConfigKey.NODE_ENV);
 
-  sender = this.configService.get<string>('sendgrid.sender');
-  devMail = this.configService.get<string>('sendgrid.devMail');
+  sender = this.configService.get<string>(ConfigKey.SENDGRID_SENDER);
+  devMail = this.configService.get<string>(ConfigKey.SENDGRID_DEV_MAIL);
 
   constructor(private readonly configService: ConfigService) {
     this.sendgridService.setApiKey(
-      this.configService.get<string>('sendgrid.apiKey'),
+      this.configService.get<string>(ConfigKey.SENDGRID_API_KEY),
     );
   }
 

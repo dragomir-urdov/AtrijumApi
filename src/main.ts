@@ -1,6 +1,7 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ConfigKey } from 'config/configuration';
 
 import helmet from 'helmet';
 import * as UserAgent from 'express-useragent';
@@ -45,7 +46,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
 
   const configService = app.get(ConfigService);
-  const port = configService.get<number>('port', 3000);
+  const port = configService.get<number>(ConfigKey.PORT, 3000);
 
   await app.listen(port);
 

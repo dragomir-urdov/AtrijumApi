@@ -17,10 +17,7 @@ export class VariantController {
 
   @Post(':type') // ------------------------------------------------------------
   @ApiBearerAuth()
-  createVariant(
-    @Param() params: VariantParams,
-    @Body() variant: CreateVariantDto,
-  ) {
-    return this.variantService.createVariant(params.type, variant);
+  create(@Param() params: VariantParams, @Body() variant: CreateVariantDto) {
+    return this.variantService.create(params.type, variant);
   }
 }

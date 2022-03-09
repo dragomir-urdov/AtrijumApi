@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   ParseIntPipe,
@@ -24,7 +23,7 @@ import { ProductService } from '@product/services/product.service';
 import { User } from '@user/entities/user.entity';
 
 // DTO
-import { CreateProductDto, UpdateProductDto } from '@product/dto';
+import { CreateProductDto } from '@product/dto';
 
 @ApiTags('product')
 @Controller('product')
@@ -35,28 +34,19 @@ export class ProductController {
   @Post() //--------------------------------------------------------------------
   @ApiBearerAuth()
   create(@UserData() user: User, @Body() createProductDto: CreateProductDto) {
-    return this.productService.createProduct(createProductDto, user);
+    return this.productService.create(createProductDto, user);
   }
 
   @Get() //---------------------------------------------------------------------
   @Public()
-  findAllProducts() {
-    return this.productService.findAllProducts();
+  findAll() {
+    return this.productService.findAll();
   }
 
   @Get(':id') //----------------------------------------------------------------
   @Public()
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productService.findOne(id);
-  }
-
-  @Patch(':id') //--------------------------------------------------------------
-  @ApiBearerAuth()
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateProductDto: UpdateProductDto,
-  ) {
-    return this.productService.update(id, updateProductDto);
   }
 
   @Delete(':id') //-------------------------------------------------------------

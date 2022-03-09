@@ -16,6 +16,7 @@ export class ProductCollection extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 100,
+    unique: true,
   })
   title: string;
 
@@ -25,6 +26,12 @@ export class ProductCollection extends BaseEntity {
   })
   description?: string;
 
-  @OneToMany(() => Product, (product) => product.collection)
+  @OneToMany(() => Product, (product) => product.collection, {
+    cascade: true,
+  })
   products!: Product[];
+}
+
+export enum ProductCollectionRelation {
+  PRODUCTS = 'products',
 }

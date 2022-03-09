@@ -22,7 +22,7 @@ export class VariantService {
    * @param variant Variant data.
    * @returns Saved variant data.
    */
-  async createVariant(
+  async create(
     type: Variant,
     variant: CreateVariantDto,
   ): Promise<ProductVariantBase> {
@@ -38,7 +38,7 @@ export class VariantService {
           return await ProductStyle.create(variant).save();
       }
     } catch (error) {
-      throw new ForbiddenException('Already exists');
+      throw new ForbiddenException(error);
     }
   }
 }

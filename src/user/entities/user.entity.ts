@@ -57,7 +57,7 @@ export class User extends BaseEntity {
   @Exclude()
   jwtTokens: Jwt[];
 
-  @OneToMany(() => Product, (product) => product.user)
+  @OneToMany(() => Product, (product) => product.user, { cascade: true })
   products: Product[];
 
   @BeforeInsert()

@@ -44,10 +44,14 @@ export class Product extends BaseEntity {
   })
   updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.products)
+  @ManyToOne(() => User, (user) => user.products, {
+    onDelete: 'SET NULL',
+  })
   user: User;
 
-  @ManyToOne(() => ProductCollection, (collection) => collection.products)
+  @ManyToOne(() => ProductCollection, (collection) => collection.products, {
+    onDelete: 'SET NULL',
+  })
   collection: ProductCollection;
 
   @OneToMany(() => ProductVariant, (variant) => variant.product, {
@@ -56,7 +60,7 @@ export class Product extends BaseEntity {
   variants: ProductVariant[];
 }
 
-export enum ProductRelations {
+export enum ProductRelation {
   VARIANTS = 'variants',
   VARIANTS_METAL = 'variants.metal',
   VARIANTS_STYLE = 'variants.style',
@@ -66,11 +70,11 @@ export enum ProductRelations {
   USER = 'user',
 }
 
-export const ALL_PRODUCT_RELATIONS = Object.values(ProductRelations);
+export const ALL_PRODUCT_RELATIONS = Object.values(ProductRelation);
 export const ALL_PRODUCT_VARIANTS = [
-  ProductRelations.VARIANTS,
-  ProductRelations.VARIANTS_METAL,
-  ProductRelations.VARIANTS_SHAPE,
-  ProductRelations.VARIANTS_STONE,
-  ProductRelations.VARIANTS_STYLE,
+  ProductRelation.VARIANTS,
+  ProductRelation.VARIANTS_METAL,
+  ProductRelation.VARIANTS_SHAPE,
+  ProductRelation.VARIANTS_STONE,
+  ProductRelation.VARIANTS_STYLE,
 ];

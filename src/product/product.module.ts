@@ -2,14 +2,18 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 // Services
-import { ProductService } from '@product/services/product.service';
-import { CollectionService } from '@product/services/collection.service';
-import { VariantService } from '@product/services/variant.service';
+import {
+  ProductService,
+  CollectionService,
+  VariantService,
+} from '@product/services';
 
 // Controllers
-import { ProductController } from '@product/controllers/product.controller';
-import { CollectionController } from '@product/controllers/collection.controller';
-import { VariantController } from '@product/controllers/variant.controller';
+import {
+  ProductController,
+  CollectionController,
+  VariantController,
+} from '@product/controllers';
 
 // Entities
 import {

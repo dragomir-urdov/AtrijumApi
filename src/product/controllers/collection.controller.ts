@@ -1,5 +1,10 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
 import { Public } from '@auth/guards/public.metadata';
@@ -8,7 +13,7 @@ import { Public } from '@auth/guards/public.metadata';
 import { CollectionService } from '@product/services/collection.service';
 
 // DTO
-import { CreateCollectionDto } from '@product/dto';
+import { CollectionResDto, CreateCollectionDto } from '@product/dto';
 
 @ApiTags('product')
 @Controller('collection')
@@ -18,13 +23,22 @@ export class CollectionController {
 
   @Post() // -------------------------------------------------------------------
   @ApiBearerAuth()
-  createCollection(@Body() collection: CreateCollectionDto) {
-    return this.collectionService.createCollection(collection);
+  @ApiCreatedResponse({ type: CollectionResDto })
+  create(@Body() collection: CreateCollectionDto) {
+    return this.collectionService.create(collection);
   }
 
   @Get() //---------------------------------------------------------------------
   @Public()
-  findAllCollections() {
-    return this.collectionService.findAllCollections();
+  @ApiOkResponse({ type: [CollectionResDto] })
+  findAll() {
+    return this.collectionService.findAll();
+  }
+
+  @Get(':id') //----------------------------------------------------------------
+  @Public()
+  @ApiOkResponse({ type: CollectionResDto })
+  find(@Param('id') id: number) {
+    return this.collectionService.find(id);
   }
 }

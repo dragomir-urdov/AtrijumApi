@@ -11,7 +11,11 @@ import {
 import * as path from 'path';
 
 // Configuration
-import { configuration, validationSchema } from 'config/configuration';
+import {
+  ConfigKey,
+  configuration,
+  validationSchema,
+} from 'config/configuration';
 
 // Modules
 import { ProductModule } from '@product/product.module';
@@ -21,6 +25,7 @@ import { SharedModule } from '@shared/shared.module';
 
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from '@shared/filters/all-exceptions.filter';
+import { Environment } from '@shared/models/environment.model';
 
 const modules = [SharedModule, UserModule, AuthModule, ProductModule];
 
@@ -41,13 +46,16 @@ const modules = [SharedModule, UserModule, AuthModule, ProductModule];
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
-        host: configService.get<string>('database.host'),
-        port: configService.get<number>('database.port'),
-        username: configService.get<string>('database.user'),
-        password: configService.get<string>('database.password'),
-        database: configService.get<string>('database.name'),
+        host: configService.get<string>(ConfigKey.DATABASE_HOST),
+        port: configService.get<number>(ConfigKey.DATABASE_PORT),
+        username: configService.get<string>(ConfigKey.DATABASE_USER),
+        password: configService.get<string>(ConfigKey.DATABASE_PASSWORD),
+        database: configService.get<string>(ConfigKey.DATABASE_NAME),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize:
+          configService.get<string>(ConfigKey.NODE_ENV) ===
+          Environment.DEVELOPMENT,
+        logging: ['error', 'info', 'log', 'warn'],
       }),
       inject: [ConfigService],
     }),
@@ -55,7 +63,7 @@ const modules = [SharedModule, UserModule, AuthModule, ProductModule];
     // ** Localization **
     I18nModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
-        fallbackLanguage: configService.get<string>('lang.default'),
+        fallbackLanguage: configService.get<string>(ConfigKey.DEFAULT_LANG),
         fallbacks: {
           'en-*': 'en',
         },

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ConfigKey } from 'config/configuration';
 
 import { I18nService } from 'nestjs-i18n';
 
@@ -42,7 +43,7 @@ export class SharedService {
    * @returns Translated message.
    */
   async translate(message: string, lang?: string, args?: any): Promise<string> {
-    lang = lang ?? this.configService.get<string>('lang.default');
+    lang = lang ?? this.configService.get<string>(ConfigKey.DEFAULT_LANG);
 
     try {
       return await this.i18n.translate(message, { lang, args });

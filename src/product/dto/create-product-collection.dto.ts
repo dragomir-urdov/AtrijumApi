@@ -11,3 +11,14 @@ export class CreateCollectionDto {
   @ApiProperty()
   description?: string;
 }
+
+export class CollectionResDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  title: string;
+
+  @ApiProperty()
+  description: string;
+}

@@ -54,3 +54,29 @@ export const validationSchema = Joi.object({
   SENDGRID_SENDER: Joi.string(),
   SENDGRID_DEV_MAIL: Joi.string().optional(),
 });
+
+export enum ConfigKey {
+  NODE_ENV = 'environment',
+  PORT = 'port',
+
+  // DATABASE
+  DATABASE_HOST = 'database.host',
+  DATABASE_PORT = 'database.port',
+  DATABASE_USER = 'database.user',
+  DATABASE_PASSWORD = 'database.password',
+  DATABASE_NAME = 'database.name',
+
+  // JWT
+  SALT = 'jwt.salt',
+  JWT_SECRET = 'jwt.secret',
+  JWT_EXPIRES_IN = 'jwt.expiresIn',
+
+  // LANG
+  DEFAULT_LANG = 'lang.default',
+  SUPPORTED_LANG = 'lang.supported',
+
+  // SENDGRID
+  SENDGRID_API_KEY = 'sendgrid.apiKey',
+  SENDGRID_SENDER = 'sendgrid.sender',
+  SENDGRID_DEV_MAIL = 'sendgrid.devMail',
+}
