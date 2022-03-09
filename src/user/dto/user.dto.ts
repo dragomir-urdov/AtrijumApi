@@ -38,18 +38,18 @@ class UserDto {
   @ApiProperty()
   confirmPassword: string;
 
-  @ApiProperty()
   @IsString()
+  @ApiProperty()
   firstName: string;
 
-  @ApiProperty()
   @IsString()
+  @ApiProperty()
   lastName: string;
 
-  @ApiPropertyOptional()
   @IsOptional()
   @IsDate()
   @MaxDate(new Date())
+  @ApiPropertyOptional()
   birthDate?: Date;
 }
 

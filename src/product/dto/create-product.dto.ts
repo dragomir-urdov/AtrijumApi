@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import {
+  ArrayMinSize,
   IsArray,
   IsInt,
   IsOptional,
@@ -9,33 +10,32 @@ import {
 } from 'class-validator';
 
 import { CreateProductVariantDto } from '@product/dto';
+import { Type } from 'class-transformer';
 
 export class CreateProductDto {
-  @ApiProperty()
   @IsInt()
-  collection: number;
-
+  @Type(() => Number)
   @ApiProperty()
-  @IsString()
-  title: string;
+  collectionId!: number;
 
-  @ApiProperty({
-    required: false,
-  })
+  @IsString()
+  @ApiProperty()
+  title!: string;
+
   @IsString()
   @IsOptional()
+  @ApiProperty({ required: false })
   description?: string;
 
-  @ApiProperty({
-    required: false,
-  })
   @IsString()
   @IsOptional()
+  @ApiProperty({ required: false })
   details?: string;
 
-  @ApiProperty({
-    type: [CreateProductVariantDto],
-  })
   @IsArray()
-  variants: CreateProductVariantDto[];
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => CreateProductVariantDto)
+  @ApiProperty({ type: () => [CreateProductVariantDto] })
+  variants!: CreateProductVariantDto[];
 }

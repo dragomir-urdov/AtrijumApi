@@ -49,8 +49,8 @@ export class ProductVariant extends BaseEntity {
   stone: ProductStoneVariant;
 
   @ManyToOne(() => ProductStyle, (style) => style.variants)
-  style: ProductStyle | number;
+  style: ProductStyle;
 
   @ManyToOne(() => ProductShape, (shape) => shape.variants)
-  shape: ProductShape | number;
+  shape: ProductShape;
 }

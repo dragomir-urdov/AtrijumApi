@@ -1,79 +1,87 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 import {
-  IsDecimal,
+  IsDefined,
   IsEnum,
   IsInt,
+  IsNotEmptyObject,
+  IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
 
-export class StoneDto {
-  @ApiProperty()
-  title: string;
-
-  @ApiProperty()
-  description: string;
-}
-
 export class StoneVariantDto {
-  @ApiProperty()
   @IsInt()
-  stone: number;
+  @ApiProperty()
+  stoneId!: number;
 
   @ApiProperty()
-  size: string;
+  @IsString()
+  size!: string;
 }
 
 export class MetalVariantDto {
-  @ApiProperty()
   @IsInt()
-  metal: number;
-
   @ApiProperty()
-  quality: number;
+  metalId!: number;
 
+  @IsInt()
   @ApiProperty()
-  color: string;
+  quality!: number;
+
+  @IsString()
+  @ApiProperty()
+  color!: string;
 }
 
 export class CreateProductVariantDto {
+  @IsNumber()
+  @Type(() => Number)
   @ApiProperty()
-  @IsDecimal()
-  price: number;
+  price!: number;
 
-  @ApiProperty()
   @IsOptional()
+  @ApiProperty()
   images?: string[];
 
-  @ApiProperty()
   @IsInt()
-  style: number;
-
+  @Type(() => Number)
   @ApiProperty()
+  styleId!: number;
+
   @IsInt()
-  shape: number;
-
+  @Type(() => Number)
   @ApiProperty()
-  @ValidateNested()
-  stone: StoneVariantDto;
+  shapeId!: number;
 
-  @ApiProperty()
+  @IsDefined()
+  @IsObject()
+  @IsNotEmptyObject()
   @ValidateNested()
-  metal: MetalVariantDto;
+  @Type(() => StoneVariantDto)
+  @ApiProperty()
+  stoneVariant!: StoneVariantDto;
+
+  @IsDefined()
+  @IsObject()
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => MetalVariantDto)
+  @ApiProperty()
+  metalVariant!: MetalVariantDto;
 }
 
 export class CreateVariantDto {
-  @ApiProperty()
   @IsString()
-  title: string;
+  @ApiProperty()
+  title!: string;
 
-  @ApiProperty({
-    required: false,
-  })
   @IsString()
   @IsOptional()
+  @ApiProperty({ required: false })
   description?: string;
 }
 
@@ -86,5 +94,6 @@ export enum Variant {
 
 export class VariantParams {
   @IsEnum(Variant)
-  type: Variant;
+  @ApiProperty()
+  type!: Variant;
 }

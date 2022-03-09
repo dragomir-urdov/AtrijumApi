@@ -41,7 +41,7 @@ export class ProductService {
     try {
       const collection = await queryRunner.manager.findOneOrFail(
         ProductCollection,
-        createProductDto.collection,
+        createProductDto.collectionId,
       );
 
       const variants = [];
@@ -51,39 +51,39 @@ export class ProductService {
 
         variant.shape = await queryRunner.manager.findOne(
           ProductShape,
-          item.shape,
+          item.shapeId,
         );
         variant.style = await queryRunner.manager.findOne(
           ProductStyle,
-          item.style,
+          item.styleId,
         );
 
-        if (item.metal) {
+        if (item.metalVariant) {
           const metal = await queryRunner.manager.findOneOrFail(
             ProductMetal,
-            item.metal.metal,
+            item.metalVariant.metalId,
           );
           if (metal) {
             variant.metal = await queryRunner.manager
               .create(ProductMetalVariant, {
                 metal,
-                color: item.metal.color,
-                quality: item.metal.quality,
+                color: item.metalVariant.color,
+                quality: item.metalVariant.quality,
               })
               .save();
           }
         }
 
-        if (item.stone) {
+        if (item.stoneVariant) {
           const stone = await queryRunner.manager.findOneOrFail(
             ProductStone,
-            item.stone.stone,
+            item.stoneVariant.stoneId,
           );
           if (stone) {
             variant.stone = await queryRunner.manager
               .create(ProductStoneVariant, {
                 stone,
-                size: item.stone.size,
+                size: item.stoneVariant.size,
               })
               .save();
           }
