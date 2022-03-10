@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 // Entities
 import {
@@ -10,7 +10,7 @@ import {
 } from '@product/entities';
 
 // DTO
-import { CreateVariantDto, Variant } from '@product/dto';
+import { VariantDto, Variant } from '@product/dto';
 
 @Injectable()
 export class VariantService {
@@ -24,7 +24,7 @@ export class VariantService {
    */
   async create(
     type: Variant,
-    variant: CreateVariantDto,
+    variant: VariantDto,
   ): Promise<ProductVariantBase> {
     try {
       switch (type) {
@@ -38,7 +38,7 @@ export class VariantService {
           return await ProductStyle.create(variant).save();
       }
     } catch (error) {
-      throw new ForbiddenException(error);
+      throw new BadRequestException(error);
     }
   }
 }

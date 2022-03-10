@@ -19,7 +19,7 @@ import {
   ALL_PRODUCT_RELATIONS,
 } from '@product/entities';
 
-import { CreateProductDto } from '@product/dto';
+import { ProductDto } from '@product/dto';
 import { Connection, DeleteResult } from 'typeorm';
 
 @Injectable()
@@ -34,10 +34,7 @@ export class ProductService {
    * @param user User who creates new product.
    * @returns Saved product data.
    */
-  async create(
-    createProductDto: CreateProductDto,
-    user: User,
-  ): Promise<Product> {
+  async create(createProductDto: ProductDto, user: User): Promise<Product> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();

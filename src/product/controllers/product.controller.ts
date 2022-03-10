@@ -9,7 +9,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 //  Auth
 import { Public } from '@auth/guards/public.metadata';
@@ -23,7 +31,12 @@ import { ProductService } from '@product/services/product.service';
 import { User } from '@user/entities/user.entity';
 
 // DTO
-import { CreateProductDto } from '@product/dto';
+import { ProductDto, ProductResDto } from '@product/dto';
+import {
+  BadRequestExceptionDto,
+  NotFoundExceptionDto,
+  UnauthorizedExceptionDto,
+} from '@shared/dto/exception.dto';
 
 @ApiTags('product')
 @Controller('product')
@@ -33,18 +46,30 @@ export class ProductController {
 
   @Post() //--------------------------------------------------------------------
   @ApiBearerAuth()
-  create(@UserData() user: User, @Body() createProductDto: CreateProductDto) {
+  @ApiCreatedResponse({
+    type: ProductResDto,
+    description: 'It creates new product and return stored product data.',
+  })
+  @ApiUnauthorizedResponse({
+    type: UnauthorizedExceptionDto,
+    description: 'Only logged in user can access this endpoint.',
+  })
+  @ApiBadRequestResponse({ type: BadRequestExceptionDto })
+  create(@UserData() user: User, @Body() createProductDto: ProductDto) {
     return this.productService.create(createProductDto, user);
   }
 
   @Get() //---------------------------------------------------------------------
   @Public()
+  @ApiOkResponse({ type: [ProductResDto] })
   findAll() {
     return this.productService.findAll();
   }
 
   @Get(':id') //----------------------------------------------------------------
   @Public()
+  @ApiOkResponse({ type: ProductResDto })
+  @ApiNotFoundResponse({ type: NotFoundExceptionDto })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productService.findOne(id);
   }

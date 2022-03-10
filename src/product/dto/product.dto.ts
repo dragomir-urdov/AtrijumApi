@@ -9,10 +9,11 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { CreateProductVariantDto } from '@product/dto';
+import { ProductVariantDto } from '@product/dto';
 import { Type } from 'class-transformer';
+import { ProductVariantResDto } from './variant.dto';
 
-export class CreateProductDto {
+export class ProductDto {
   @IsInt()
   @Type(() => Number)
   @ApiProperty()
@@ -35,7 +36,21 @@ export class CreateProductDto {
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => CreateProductVariantDto)
-  @ApiProperty({ type: () => [CreateProductVariantDto] })
-  variants!: CreateProductVariantDto[];
+  @Type(() => ProductVariantDto)
+  @ApiProperty({ type: () => [ProductVariantDto] })
+  variants!: ProductVariantDto[];
+}
+
+export class ProductResDto extends ProductDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  createdAt: Date;
+
+  @ApiProperty()
+  updatedAt: Date;
+
+  @ApiProperty({ type: () => [ProductVariantResDto] })
+  variants: ProductVariantResDto[];
 }

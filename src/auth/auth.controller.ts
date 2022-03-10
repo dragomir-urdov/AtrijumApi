@@ -102,7 +102,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: SuccessDto })
-  @ApiUnauthorizedResponse({ type: UnauthorizedExceptionDto })
+  @ApiUnauthorizedResponse({
+    type: UnauthorizedExceptionDto,
+    description: 'Only logged in user can access this endpoint.',
+  })
   async logout(
     @UserData() user: User,
     @UserAgent() userAgent: UserAgentData,

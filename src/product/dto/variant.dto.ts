@@ -13,6 +13,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+// Product variants ------------------------------------------------------------
 export class StoneVariantDto {
   @IsInt()
   @ApiProperty()
@@ -37,7 +38,7 @@ export class MetalVariantDto {
   color!: string;
 }
 
-export class CreateProductVariantDto {
+export class ProductVariantDto {
   @IsNumber()
   @Type(() => Number)
   @ApiProperty()
@@ -74,7 +75,13 @@ export class CreateProductVariantDto {
   metalVariant!: MetalVariantDto;
 }
 
-export class CreateVariantDto {
+export class ProductVariantResDto extends ProductVariantDto {
+  @ApiProperty()
+  id: number;
+}
+
+// Variant ---------------------------------------------------------------------
+export class VariantDto {
   @IsString()
   @ApiProperty()
   title!: string;
@@ -83,6 +90,11 @@ export class CreateVariantDto {
   @IsOptional()
   @ApiProperty({ required: false })
   description?: string;
+}
+
+export class VariantResDto extends VariantDto {
+  @ApiProperty()
+  id: number;
 }
 
 export enum Variant {
