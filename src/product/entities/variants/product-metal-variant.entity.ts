@@ -28,6 +28,6 @@ export class ProductMetalVariant extends BaseEntity {
   @ManyToOne(() => ProductMetal, (metal) => metal.variants)
   metal: ProductMetal;
 
-  @OneToMany(() => ProductVariant, (variant) => variant.metal)
+  @OneToMany(() => ProductVariant, (variant) => variant.metalVariant)
   variants?: ProductVariant[];
 }

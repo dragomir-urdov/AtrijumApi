@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 import {
@@ -76,7 +76,7 @@ export class ProductVariantDto {
 }
 
 export class ProductVariantResDto extends ProductVariantDto {
-  @ApiProperty()
+  @ApiResponseProperty()
   id: number;
 }
 
@@ -93,7 +93,7 @@ export class VariantDto {
 }
 
 export class VariantResDto extends VariantDto {
-  @ApiProperty()
+  @ApiResponseProperty()
   id: number;
 }
 

@@ -20,8 +20,8 @@ import { ProductImage } from './product-image.entity';
 @Entity()
 @Unique('unique_product_variant', [
   'product',
-  'metal',
-  'stone',
+  'metalVariant',
+  'stoneVariant',
   'style',
   'shape',
 ])
@@ -43,10 +43,10 @@ export class ProductVariant extends BaseEntity {
   product: Product;
 
   @ManyToOne(() => ProductMetalVariant, (metal) => metal.variants)
-  metal: ProductMetalVariant;
+  metalVariant: ProductMetalVariant;
 
   @ManyToOne(() => ProductStoneVariant, (metal) => metal.variants)
-  stone: ProductStoneVariant;
+  stoneVariant: ProductStoneVariant;
 
   @ManyToOne(() => ProductStyle, (style) => style.variants)
   style: ProductStyle;

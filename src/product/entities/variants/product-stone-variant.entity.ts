@@ -23,6 +23,6 @@ export class ProductStoneVariant extends BaseEntity {
   @ManyToOne(() => ProductStone, (stone) => stone.variants)
   stone: ProductStone;
 
-  @OneToMany(() => ProductVariant, (variant) => variant.stone)
+  @OneToMany(() => ProductVariant, (variant) => variant.stoneVariant)
   variants?: ProductVariant[];
 }

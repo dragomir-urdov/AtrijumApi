@@ -7,6 +7,7 @@ import {
   Delete,
   ParseIntPipe,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 
 import {
@@ -31,7 +32,12 @@ import { ProductService } from '@product/services/product.service';
 import { User } from '@user/entities/user.entity';
 
 // DTO
-import { ProductDto, ProductResDto } from '@product/dto';
+import {
+  ProductDto,
+  ProductItemsResDto,
+  ProductQueryDto,
+  ProductResDto,
+} from '@product/dto';
 import {
   BadRequestExceptionDto,
   NotFoundExceptionDto,
@@ -61,9 +67,9 @@ export class ProductController {
 
   @Get() //---------------------------------------------------------------------
   @Public()
-  @ApiOkResponse({ type: [ProductResDto] })
-  findAll() {
-    return this.productService.findAll();
+  @ApiOkResponse({ type: ProductItemsResDto })
+  findAll(@Query() query: ProductQueryDto): Promise<ProductItemsResDto> {
+    return this.productService.findAll(query);
   }
 
   @Get(':id') //----------------------------------------------------------------

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   HttpException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 
@@ -19,8 +20,14 @@ import {
   ALL_PRODUCT_RELATIONS,
 } from '@product/entities';
 
-import { ProductDto } from '@product/dto';
+import {
+  ProductDto,
+  ProductItemsResDto,
+  ProductOrderProperty,
+  ProductQueryDto,
+} from '@product/dto';
 import { Connection, DeleteResult } from 'typeorm';
+import { DatabaseOrder } from '@shared/models/database-order.model';
 
 @Injectable()
 export class ProductService {
@@ -67,7 +74,7 @@ export class ProductService {
             item.metalVariant.metalId,
           );
           if (metal) {
-            variant.metal = await queryRunner.manager
+            variant.metalVariant = await queryRunner.manager
               .create(ProductMetalVariant, {
                 metal,
                 color: item.metalVariant.color,
@@ -83,7 +90,7 @@ export class ProductService {
             item.stoneVariant.stoneId,
           );
           if (stone) {
-            variant.stone = await queryRunner.manager
+            variant.stoneVariant = await queryRunner.manager
               .create(ProductStoneVariant, {
                 stone,
                 size: item.stoneVariant.size,
@@ -122,10 +129,95 @@ export class ProductService {
    * @author Dragomir Urdov
    * @returns All products data.
    */
-  async findAll(): Promise<Product[]> {
-    return await Product.find({
-      relations: ALL_PRODUCT_RELATIONS,
-    });
+  async findAll(query: ProductQueryDto): Promise<ProductItemsResDto> {
+    let queryBuilder = ProductVariant.createQueryBuilder('variant')
+
+      // JOINS
+      .leftJoin('variant.product', 'product')
+      .leftJoin('product.collection', 'collection')
+
+      .leftJoin('variant.style', 'style')
+      .leftJoin('variant.shape', 'shape')
+
+      .leftJoin('variant.stoneVariant', 'stoneVariant')
+      .leftJoin('stoneVariant.stone', 'stone')
+
+      .leftJoin('variant.metalVariant', 'metalVariant')
+      .leftJoin('metalVariant.metal', 'metal')
+
+      // SELECTIONS
+      .select('product.id', 'id')
+      .addSelect('product.title', 'title')
+      .addSelect('product.createdAt', 'createdAt')
+
+      .addSelect('collection.id', 'collectionId')
+
+      .addSelect('metal.id', 'metalId')
+      .addSelect('stone.id', 'stoneId')
+      .addSelect('style.id', 'styleId')
+      .addSelect('shape.id', 'shapeId')
+
+      .addSelect('MAX(variant.price)', 'maxPrice')
+      .addSelect('MIN(variant.price)', 'minPrice')
+
+      // GROUP BY
+      .groupBy('id')
+      .addGroupBy('collectionId')
+      .addGroupBy('metalId')
+      .addGroupBy('stoneId')
+      .addGroupBy('shapeId')
+      .addGroupBy('styleId');
+
+    // FILTERING
+    if (query.collectionId) {
+      queryBuilder = queryBuilder.having('collectionId = :collectionId', {
+        collectionId: query.collectionId,
+      });
+    }
+    if (query.metalId) {
+      queryBuilder = queryBuilder.andHaving('metalId = :metalId', {
+        metalId: query.metalId,
+      });
+    }
+    if (query.shapeId) {
+      queryBuilder = queryBuilder.andHaving('shapeId = :shapeId', {
+        shapeId: query.shapeId,
+      });
+    }
+    if (query.stoneId) {
+      queryBuilder = queryBuilder.andHaving('stoneId = :stoneId', {
+        stoneId: query.stoneId,
+      });
+    }
+    if (query.styleId) {
+      queryBuilder = queryBuilder.andHaving('styleId = :styleId', {
+        styleId: query.styleId,
+      });
+    }
+
+    if (query.order) {
+      queryBuilder = queryBuilder.orderBy(
+        query.orderBy ?? ProductOrderProperty.CREATED_AT,
+        query.order ?? DatabaseOrder.ASC,
+      );
+    }
+
+    queryBuilder = queryBuilder.maxExecutionTime(3000); // 3s
+
+    try {
+      const products = await queryBuilder.getRawMany();
+
+      const response = new ProductItemsResDto();
+      response.products = products.slice(
+        ((query.page || 1) - 1) * (query.take ?? 20),
+        query.take ?? 20,
+      );
+      response.count = products.length;
+
+      return response;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   /**
