@@ -2,6 +2,7 @@ import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 import {
+  IsArray,
   IsDefined,
   IsEnum,
   IsInt,
@@ -10,6 +11,7 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
@@ -44,9 +46,11 @@ export class ProductVariantDto {
   @ApiProperty()
   price!: number;
 
-  @IsOptional()
   @ApiProperty()
-  images?: string[];
+  @IsArray()
+  @Min(1)
+  @ApiProperty({ type: [String] })
+  images: string[];
 
   @IsInt()
   @Type(() => Number)

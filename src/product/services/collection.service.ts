@@ -22,9 +22,12 @@ export class CollectionService {
    * @param collection Collection data.
    * @returns Saved collection data
    */
-  async create(collection: CreateCollectionDto): Promise<ProductCollection> {
+  async create(
+    collection: CreateCollectionDto,
+    image: string,
+  ): Promise<ProductCollection> {
     try {
-      return await ProductCollection.create(collection).save();
+      return await ProductCollection.create({ ...collection, image }).save();
     } catch (error) {
       throw new BadRequestException(error);
     }

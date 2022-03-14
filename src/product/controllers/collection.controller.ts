@@ -1,17 +1,29 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Post,
+  Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -21,6 +33,7 @@ import { Public } from '@auth/guards/public.metadata';
 
 // Services
 import { CollectionService } from '@product/services/collection.service';
+import { SharedService } from '@shared/services/shared.service';
 
 // DTO
 import { CollectionResDto, CreateCollectionDto } from '@product/dto';
@@ -28,6 +41,7 @@ import {
   NotFoundExceptionDto,
   UnauthorizedExceptionDto,
 } from '@shared/dto/exception.dto';
+import { Response } from 'express';
 
 @ApiTags('product')
 @Controller('collection')
@@ -36,7 +50,20 @@ export class CollectionController {
   constructor(private readonly collectionService: CollectionService) {}
 
   @Post() // -------------------------------------------------------------------
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './files/collections',
+        filename: SharedService.editFileName,
+      }),
+      fileFilter: SharedService.imageFileFilter,
+      limits: {
+        fileSize: 2000000, // 2MB
+      },
+    }),
+  )
   @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
   @ApiCreatedResponse({
     type: CollectionResDto,
     description: 'Create new collection and return stored collection data',
@@ -45,8 +72,46 @@ export class CollectionController {
     type: UnauthorizedExceptionDto,
     description: 'Only logged in user can access this endpoint.',
   })
-  create(@Body() collection: CreateCollectionDto) {
-    return this.collectionService.create(collection);
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          nullable: false,
+        },
+        title: {
+          type: 'string',
+          nullable: false,
+        },
+        description: {
+          type: 'string',
+          nullable: true,
+        },
+      },
+    },
+  })
+  create(
+    @UploadedFile() image: Express.Multer.File,
+    @Body() collection: CreateCollectionDto,
+  ) {
+    if (!image) {
+      throw new BadRequestException('Image is required!');
+    }
+    return this.collectionService.create(collection, image?.filename);
+  }
+
+  @Get('image/:name') // -------------------------------------------------------
+  @Public()
+  @ApiResponse({
+    status: HttpStatus.OK,
+    schema: {
+      type: 'file',
+    },
+  })
+  image(@Param('name') image: string, @Res() res: Response) {
+    return res.sendFile(image, { root: 'files/collections' });
   }
 
   @Get() //---------------------------------------------------------------------

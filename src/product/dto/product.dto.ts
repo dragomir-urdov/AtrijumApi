@@ -14,6 +14,7 @@ import { Exclude, Type } from 'class-transformer';
 
 import { ProductVariantDto, ProductVariantResDto } from '@product/dto';
 import { DatabaseOrder } from '@shared/models/database-order.model';
+import { PartialType } from '@nestjs/mapped-types';
 
 /**
  * Base Product DTO for create new product.
@@ -38,6 +39,10 @@ export class ProductDto {
   @ApiProperty({ required: false })
   details?: string;
 
+  @IsString()
+  @ApiProperty()
+  image: string;
+
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
@@ -45,6 +50,8 @@ export class ProductDto {
   @ApiProperty({ type: () => [ProductVariantDto] })
   variants!: ProductVariantDto[];
 }
+
+export class ProductUpdateDto extends PartialType(ProductDto) {}
 
 /**
  * Created product

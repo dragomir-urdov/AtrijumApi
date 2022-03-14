@@ -25,9 +25,11 @@ import {
   ProductItemsResDto,
   ProductOrderProperty,
   ProductQueryDto,
+  ProductUpdateDto,
 } from '@product/dto';
 import { Connection, DeleteResult } from 'typeorm';
 import { DatabaseOrder } from '@shared/models/database-order.model';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
 export class ProductService {
@@ -145,9 +147,13 @@ export class ProductService {
       .leftJoin('variant.metalVariant', 'metalVariant')
       .leftJoin('metalVariant.metal', 'metal')
 
+      // Only published products
+      .where('product.published = true')
+
       // SELECTIONS
       .select('product.id', 'id')
       .addSelect('product.title', 'title')
+      .addSelect('product.image', 'image')
       .addSelect('product.createdAt', 'createdAt')
 
       .addSelect('collection.id', 'collectionId')

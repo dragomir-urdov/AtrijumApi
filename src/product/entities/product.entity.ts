@@ -34,6 +34,15 @@ export class Product extends BaseEntity {
   @Column({ nullable: true })
   details?: string;
 
+  @Column()
+  image: string;
+
+  @Column({
+    name: 'published',
+    default: false,
+  })
+  isPublished?: boolean;
+
   @CreateDateColumn({
     name: 'created_at',
   })

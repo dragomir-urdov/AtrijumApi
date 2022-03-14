@@ -26,6 +26,9 @@ export class ProductCollection extends BaseEntity {
   })
   description?: string;
 
+  @Column()
+  image: string;
+
   @OneToMany(() => Product, (product) => product.collection, {
     cascade: true,
   })
