@@ -21,17 +21,21 @@ const config = new DocumentBuilder()
   .build();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   // OpenAPI
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
   // Protection
   app.use(helmet());
-  app.enableCors();
 
   // User agent
   app.use(UserAgent.express());
+  app.enableCors({
+    origin: ['http://localhost:4200'],
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Accept', 'Content-Type', 'Authorization'],
+  });
 
   // Global pipes
   app.useGlobalPipes(

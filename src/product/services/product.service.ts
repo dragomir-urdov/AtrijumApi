@@ -25,11 +25,9 @@ import {
   ProductItemsResDto,
   ProductOrderProperty,
   ProductQueryDto,
-  ProductUpdateDto,
 } from '@product/dto';
 import { Connection, DeleteResult } from 'typeorm';
 import { DatabaseOrder } from '@shared/models/database-order.model';
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
 export class ProductService {
