@@ -238,11 +238,10 @@ export class AuthService {
    * @param jwtToken Jwt token.
    * @returns Jwt expires in date in milliseconds.
    */
-  private jwtExpiresIn(jwtToken: string): Date {
-    const expiresOffset = 10000;
+  private jwtExpiresIn(jwtToken: string): number {
     const expiresIn =
       (this.jwtService.decode(jwtToken) as JwtPayload).exp * 1000;
 
-    return new Date(expiresIn - expiresOffset);
+    return expiresIn;
   }
 }

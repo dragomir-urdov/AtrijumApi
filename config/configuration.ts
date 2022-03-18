@@ -4,6 +4,7 @@ export const configuration = () => ({
   environment: process.env.NODE_ENV || 'development',
 
   port: parseInt(process.env.PORT, 10) || 3000,
+  corsOrigin: process.env.CORS_ORIGIN,
   database: {
     host: process.env.DATABASE_HOST || 'localhost',
     port: process.env.DATABASE_PORT,
@@ -45,6 +46,8 @@ export const validationSchema = Joi.object({
   // Environment file
   PORT: Joi.number().integer().default(3000),
 
+  CORS_ORIGIN: Joi.string(),
+
   // MYSQL
   DATABASE_HOST: Joi.string().default('localhost'),
   DATABASE_PORT: Joi.number().integer().default(3306),
@@ -70,6 +73,7 @@ export const validationSchema = Joi.object({
 export enum ConfigKey {
   NODE_ENV = 'environment',
   PORT = 'port',
+  CORS_ORIGIN = 'corsOrigin',
 
   // DATABASE
   DATABASE_HOST = 'database.host',

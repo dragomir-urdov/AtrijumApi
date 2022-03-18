@@ -9,6 +9,7 @@ import * as UserAgent from 'express-useragent';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
+import { Environment } from '@shared/models/environment.model';
 
 const config = new DocumentBuilder()
   .setTitle('Atrijum Atelje')
@@ -22,9 +23,19 @@ const config = new DocumentBuilder()
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
-  // OpenAPI
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+
+  // Config
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>(ConfigKey.PORT, 3000);
+  const origin = [configService.get<string>(ConfigKey.CORS_ORIGIN)];
+  const isDevelopmentEnvironment =
+    configService.get<string>(ConfigKey.NODE_ENV) === Environment.DEVELOPMENT;
+
+  if (isDevelopmentEnvironment) {
+    // OpenAPI
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+  }
 
   // Protection
   app.use(helmet());
@@ -32,7 +43,7 @@ async function bootstrap() {
   // User agent
   app.use(UserAgent.express());
   app.enableCors({
-    origin: ['http://localhost:4200'],
+    origin,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Accept', 'Content-Type', 'Authorization'],
   });
@@ -49,12 +60,9 @@ async function bootstrap() {
   const reflector = app.get(Reflector);
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
 
-  const configService = app.get(ConfigService);
-  const port = configService.get<number>(ConfigKey.PORT, 3000);
-
   await app.listen(port);
 
-  if (process.env.NODE_ENV === 'development') {
+  if (isDevelopmentEnvironment) {
     console.log(
       `App listening on port ${port}\nVisit API documentation at: http://localhost:${port}/api`,
     );
