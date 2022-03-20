@@ -5,5 +5,5 @@ export class JwtTokenDto {
   token: string;
 
   @ApiProperty()
-  expiresIn: number;
+  expiresAt: number;
 }

@@ -69,7 +69,7 @@ export class AuthService {
     if (isMatch) {
       return user;
     } else {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Bad credentials!');
     }
   }
 
@@ -131,7 +131,7 @@ export class AuthService {
       return {
         jwt: {
           token: jwtToken,
-          expiresIn: this.jwtExpiresIn(jwtToken),
+          expiresAt: this.jwtExpiresAt(jwtToken),
         },
         user: newUser,
       };
@@ -155,7 +155,7 @@ export class AuthService {
     return {
       jwt: {
         token: jwtToken,
-        expiresIn: this.jwtExpiresIn(jwtToken),
+        expiresAt: this.jwtExpiresAt(jwtToken),
       },
       user,
     };
@@ -189,6 +189,18 @@ export class AuthService {
     }
   }
 
+  async resetToken(user: User, userAgent: UserAgentData): Promise<UserResDto> {
+    const jwtToken = await this.issueJwtToken(user, userAgent, true);
+
+    return {
+      jwt: {
+        token: jwtToken,
+        expiresAt: this.jwtExpiresAt(jwtToken),
+      },
+      user,
+    };
+  }
+
   /**
    * It issue new jwt token.
    *
@@ -199,6 +211,7 @@ export class AuthService {
   private async issueJwtToken(
     user: User,
     { os, platform, browser }: UserAgentData,
+    preventCreation = false,
   ): Promise<string> {
     const payload = { email: user.email, id: user.id } as JwtPayload;
     const jwtToken = await this.jwtService.signAsync(payload);
@@ -213,6 +226,10 @@ export class AuthService {
     if (token) {
       token.jwtToken = jwtToken;
     } else {
+      if (preventCreation) {
+        throw new UnauthorizedException('Unauthorized device!');
+      }
+
       // Save token with user and user device data.
       token = new Jwt();
       token.os = os;
@@ -238,10 +255,9 @@ export class AuthService {
    * @param jwtToken Jwt token.
    * @returns Jwt expires in date in milliseconds.
    */
-  private jwtExpiresIn(jwtToken: string): number {
-    const expiresIn =
+  private jwtExpiresAt(jwtToken: string): number {
+    const expiresAt =
       (this.jwtService.decode(jwtToken) as JwtPayload).exp * 1000;
-
-    return expiresIn;
+    return expiresAt;
   }
 }

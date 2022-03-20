@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { FindOneOptions } from 'typeorm';
@@ -26,12 +26,8 @@ export class UserService {
     const user = await this.findOne({ where: { email: createUserDto.email } });
 
     if (user) {
-      throw new HttpException(
-        {
-          error: `User with ${user.email} email address already exists.`,
-          status: HttpStatus.FORBIDDEN,
-        },
-        HttpStatus.FORBIDDEN,
+      throw new ForbiddenException(
+        `User with ${user.email} email address already exists.`,
       );
     }
 

@@ -66,8 +66,6 @@ export class AuthController {
     @Body() user: UserCreateDto,
     @UserAgent() userAgent: UserAgentData,
   ): Promise<UserResDto> {
-    console.log(user, userAgent);
-
     return this.authService.signup(user, userAgent);
   }
 
@@ -111,5 +109,23 @@ export class AuthController {
     @UserAgent() userAgent: UserAgentData,
   ): Promise<SuccessDto> {
     return this.authService.logout(user, userAgent);
+  }
+
+  @Post('reset-token')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({
+    type: UserLoginDto,
+    description: 'Token successfully restarted.',
+  })
+  @ApiUnauthorizedResponse({
+    type: UnauthorizedExceptionDto,
+    description: 'Wrong credentials.',
+  })
+  async resetToken(
+    @UserData() user: User,
+    @UserAgent() userAgent: UserAgentData,
+  ): Promise<UserResDto> {
+    return this.authService.resetToken(user, userAgent);
   }
 }
