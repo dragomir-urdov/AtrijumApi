@@ -26,6 +26,7 @@ import { SharedModule } from '@shared/shared.module';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from '@shared/filters/all-exceptions.filter';
 import { Environment } from '@shared/models/environment.model';
+import { ServeStaticModule } from '@nestjs/serve-static';
 
 const modules = [SharedModule, UserModule, AuthModule, ProductModule];
 
@@ -68,13 +69,17 @@ const modules = [SharedModule, UserModule, AuthModule, ProductModule];
           'en-*': 'en',
         },
         parserOptions: {
-          path: path.join(__dirname, '../i18n/'),
+          path: path.join(__dirname, '..', 'i18n'),
           watch: true,
         },
       }),
       parser: I18nJsonParser,
       resolvers: [AcceptLanguageResolver],
       inject: [ConfigService],
+    }),
+
+    ServeStaticModule.forRoot({
+      rootPath: path.join(__dirname, '..', '..', 'files'),
     }),
 
     // ** Other modules **

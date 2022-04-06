@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
@@ -111,7 +112,14 @@ export class CollectionController {
     },
   })
   image(@Param('name') image: string, @Res() res: Response) {
-    return res.sendFile(image, { root: 'files/collections' });
+    if (!image) {
+      throw new BadRequestException();
+    }
+    try {
+      return res.sendFile(image, { root: 'files/collections' });
+    } catch (error) {
+      throw new NotFoundException();
+    }
   }
 
   @Get() //---------------------------------------------------------------------

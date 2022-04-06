@@ -111,7 +111,7 @@ export class AuthController {
     return this.authService.logout(user, userAgent);
   }
 
-  @Post('reset-token')
+  @Post('refresh-token')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({
@@ -122,10 +122,10 @@ export class AuthController {
     type: UnauthorizedExceptionDto,
     description: 'Wrong credentials.',
   })
-  async resetToken(
+  async refreshToken(
     @UserData() user: User,
     @UserAgent() userAgent: UserAgentData,
   ): Promise<UserResDto> {
-    return this.authService.resetToken(user, userAgent);
+    return this.authService.refreshToken(user, userAgent);
   }
 }

@@ -189,7 +189,18 @@ export class AuthService {
     }
   }
 
-  async resetToken(user: User, userAgent: UserAgentData): Promise<UserResDto> {
+  /**
+   * It refresh already issued jwt token.
+   *
+   * @author Dragomir Urdov
+   * @param user User data.
+   * @param userAgent User agent data.
+   * @returns New jwt token and user data.
+   */
+  async refreshToken(
+    user: User,
+    userAgent: UserAgentData,
+  ): Promise<UserResDto> {
     const jwtToken = await this.issueJwtToken(user, userAgent, true);
 
     return {

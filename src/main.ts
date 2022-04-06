@@ -1,6 +1,8 @@
 import { NestFactory, Reflector } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+
 import { ConfigKey } from 'config/configuration';
 
 import helmet from 'helmet';
@@ -22,7 +24,7 @@ const config = new DocumentBuilder()
   .build();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Config
   const configService = app.get(ConfigService);
@@ -38,7 +40,11 @@ async function bootstrap() {
   }
 
   // Protection
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
 
   // User agent
   app.use(UserAgent.express());
