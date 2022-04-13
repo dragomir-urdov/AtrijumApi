@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 // Entities
 import {
@@ -39,6 +43,32 @@ export class VariantService {
       }
     } catch (error) {
       throw new BadRequestException(error);
+    }
+  }
+
+  /**
+   * It retrieves all product variants.
+   *
+   * @author Dragomir Urdov
+   * @returns All product variants.
+   */
+  async getAll() {
+    try {
+      const [stones, metals, shapes, styles] = await Promise.all([
+        ProductStone.find(),
+        ProductMetal.find(),
+        ProductShape.find(),
+        ProductStyle.find(),
+      ]);
+
+      return {
+        stones,
+        metals,
+        shapes,
+        styles,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException();
     }
   }
 }

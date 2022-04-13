@@ -3,12 +3,9 @@ import {
   Body,
   Controller,
   Get,
-  HttpStatus,
-  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
-  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -24,7 +21,6 @@ import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
-  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -42,9 +38,8 @@ import {
   NotFoundExceptionDto,
   UnauthorizedExceptionDto,
 } from '@shared/dto/exception.dto';
-import { Response } from 'express';
 
-@ApiTags('product')
+@ApiTags('collection')
 @Controller('collection')
 @UseGuards(JwtAuthGuard)
 export class CollectionController {
@@ -101,25 +96,6 @@ export class CollectionController {
       throw new BadRequestException('Image is required!');
     }
     return this.collectionService.create(collection, image?.filename);
-  }
-
-  @Get('image/:name') // -------------------------------------------------------
-  @Public()
-  @ApiResponse({
-    status: HttpStatus.OK,
-    schema: {
-      type: 'file',
-    },
-  })
-  image(@Param('name') image: string, @Res() res: Response) {
-    if (!image) {
-      throw new BadRequestException();
-    }
-    try {
-      return res.sendFile(image, { root: 'files/collections' });
-    } catch (error) {
-      throw new NotFoundException();
-    }
   }
 
   @Get() //---------------------------------------------------------------------

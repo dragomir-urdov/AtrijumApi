@@ -1,13 +1,15 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
+import { Public } from '@auth/guards/public.metadata';
 
 // Services
 import { VariantService } from '@product/services/variant.service';
@@ -19,7 +21,7 @@ import {
   UnauthorizedExceptionDto,
 } from '@shared/dto/exception.dto';
 
-@ApiTags('product')
+@ApiTags('variant')
 @Controller('variant')
 @UseGuards(JwtAuthGuard)
 export class VariantController {
@@ -32,5 +34,12 @@ export class VariantController {
   @ApiUnauthorizedResponse({ type: UnauthorizedExceptionDto })
   create(@Param() params: VariantParams, @Body() variant: VariantDto) {
     return this.variantService.create(params.type, variant);
+  }
+
+  @Get()
+  @Public()
+  @ApiOkResponse()
+  getAll() {
+    return this.variantService.getAll();
   }
 }

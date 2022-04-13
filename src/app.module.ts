@@ -1,6 +1,8 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { APP_FILTER } from '@nestjs/core';
 
 import {
   AcceptLanguageResolver,
@@ -9,6 +11,8 @@ import {
 } from 'nestjs-i18n';
 
 import * as path from 'path';
+
+import { LoggerMiddleware } from '@shared/middlewares/logger.middleware';
 
 // Configuration
 import {
@@ -22,13 +26,18 @@ import { ProductModule } from '@product/product.module';
 import { AuthModule } from '@auth/auth.module';
 import { UserModule } from '@user/user.module';
 import { SharedModule } from '@shared/shared.module';
+import { GalleryModule } from '@gallery/gallery.module';
 
-import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionsFilter } from '@shared/filters/all-exceptions.filter';
 import { Environment } from '@shared/models/environment.model';
-import { ServeStaticModule } from '@nestjs/serve-static';
+import { AllExceptionsFilter } from '@shared/filters/all-exceptions.filter';
 
-const modules = [SharedModule, UserModule, AuthModule, ProductModule];
+const modules = [
+  SharedModule,
+  UserModule,
+  AuthModule,
+  ProductModule,
+  GalleryModule,
+];
 
 @Module({
   imports: [
@@ -79,7 +88,7 @@ const modules = [SharedModule, UserModule, AuthModule, ProductModule];
     }),
 
     ServeStaticModule.forRoot({
-      rootPath: path.join(__dirname, '..', '..', 'files'),
+      rootPath: path.join(process.cwd(), 'files'),
     }),
 
     // ** Other modules **
@@ -92,4 +101,8 @@ const modules = [SharedModule, UserModule, AuthModule, ProductModule];
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

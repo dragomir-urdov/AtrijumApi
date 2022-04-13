@@ -8,25 +8,14 @@ import {
   ParseIntPipe,
   UseGuards,
   Query,
-  UseInterceptors,
-  UploadedFiles,
-  Res,
-  HttpStatus,
-  Patch,
 } from '@nestjs/common';
-
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiBody,
-  ApiConsumes,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
-  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -38,7 +27,6 @@ import { UserData } from '@auth/decorators/user.decorator';
 
 // Service
 import { ProductService } from '@product/services/product.service';
-import { SharedService } from '@shared/services/shared.service';
 
 // Entities
 import { User } from '@user/entities/user.entity';
@@ -49,14 +37,12 @@ import {
   ProductItemsResDto,
   ProductQueryDto,
   ProductResDto,
-  ProductUpdateDto,
 } from '@product/dto';
 import {
   BadRequestExceptionDto,
   NotFoundExceptionDto,
   UnauthorizedExceptionDto,
 } from '@shared/dto/exception.dto';
-import { Response } from 'express';
 
 @ApiTags('product')
 @Controller('product')
@@ -98,51 +84,5 @@ export class ProductController {
   @ApiBearerAuth()
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.productService.remove(id);
-  }
-
-  @Get('image/:name') // -------------------------------------------------------
-  @Public()
-  @ApiResponse({
-    status: HttpStatus.OK,
-    schema: {
-      type: 'file',
-    },
-  })
-  image(@Param('name') image: string, @Res() res: Response) {
-    return res.sendFile(image, { root: 'files/products' });
-  }
-
-  @Post('images') // -----------------------------------------------------------
-  @UseInterceptors(
-    FilesInterceptor('images', null, {
-      storage: diskStorage({
-        destination: './files/products',
-        filename: SharedService.editFileName,
-      }),
-      fileFilter: SharedService.imageFileFilter,
-      limits: {
-        fileSize: 2000000, // 2MB
-      },
-    }),
-  )
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  uploadImages(@UploadedFiles() images: Array<Express.Multer.File>) {
-    return {
-      images: images.map((image) => ({
-        name: image.filename,
-        path: image.path,
-      })),
-    };
   }
 }

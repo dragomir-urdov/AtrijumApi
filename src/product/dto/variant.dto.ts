@@ -110,6 +110,9 @@ export enum Variant {
 
 export class VariantParams {
   @IsEnum(Variant)
-  @ApiProperty()
+  @ApiProperty({
+    type: () => Variant,
+    enum: Variant,
+  })
   type!: Variant;
 }
