@@ -53,12 +53,12 @@ export class GalleryController {
     return res.sendFile(image, { root: `files/${album}` });
   }
 
-  @Post('products') // -------------------------------------------------------------------
+  @Post(':album') // -------------------------------------------------------------------
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FilesInterceptor('images', null, {
       storage: diskStorage({
-        destination: './files/products',
+        destination: SharedService.imagesDestination,
         filename: SharedService.editFileName,
       }),
       fileFilter: SharedService.imageFileFilter,
@@ -72,19 +72,23 @@ export class GalleryController {
     schema: {
       type: 'object',
       properties: {
-        file: {
+        files: {
           type: 'string',
           format: 'binary',
         },
       },
     },
   })
-  uploadProductImages(@UploadedFiles() images: Array<Express.Multer.File>) {
+  uploadProductImages(
+    @UploadedFiles() images: Array<Express.Multer.File>,
+    @Param('album') album: string,
+  ) {
     return {
       images: images.map((image) => ({
         name: image.filename,
         path: image.path,
       })),
+      album,
     };
   }
 }

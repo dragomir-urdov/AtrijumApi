@@ -1,4 +1,4 @@
-import { extname } from 'path';
+import { extname, join } from 'path';
 
 import { BadRequestException, Injectable } from '@nestjs/common';
 
@@ -56,6 +56,14 @@ export class SharedService {
     }
   }
 
+  /**
+   * It filters images files.
+   *
+   * @author Dragomir Urdov
+   * @param req Request data
+   * @param file File data
+   * @param callback Does file match requirements.
+   */
   static imageFileFilter = (
     req: Request,
     file: Express.Multer.File,
@@ -70,6 +78,14 @@ export class SharedService {
     callback(null, true);
   };
 
+  /**
+   * It determines file name.
+   *
+   * @author Dragomir Urdov
+   * @param req Request data.
+   * @param file File data
+   * @param callback File name.
+   */
   static editFileName = (
     req: Request,
     file: Express.Multer.File,
@@ -82,5 +98,27 @@ export class SharedService {
       .map(() => Math.round(Math.random() * 16).toString(16))
       .join('');
     callback(null, `${name}-${randomName}${fileExtName}`);
+  };
+
+  /**
+   * It determines file destination based on album property.
+   * @note Album property in request param or body is required!
+   *
+   * @author Dragomir Urdov
+   * @param req Request data.
+   * @param file File data.
+   * @param callback File destination.
+   */
+  static imagesDestination = (
+    req: Request,
+    file: Express.Multer.File,
+    callback: (error: any | null, destination: string) => void,
+  ) => {
+    const destination = join(
+      '.',
+      'files',
+      req.params.album ?? req.body.album ?? '',
+    );
+    callback(null, destination);
   };
 }
