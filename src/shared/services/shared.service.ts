@@ -69,7 +69,7 @@ export class SharedService {
     file: Express.Multer.File,
     callback: (error: any | null, pass: boolean) => void,
   ) => {
-    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
       return callback(
         new BadRequestException('Only image files are allowed!'),
         false,
