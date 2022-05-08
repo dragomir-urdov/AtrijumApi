@@ -6,7 +6,7 @@ import { APP_FILTER } from '@nestjs/core';
 
 import {
   AcceptLanguageResolver,
-  I18nJsonParser,
+  I18nJsonLoader,
   I18nModule,
 } from 'nestjs-i18n';
 
@@ -71,20 +71,16 @@ const modules = [
     }),
 
     // ** Localization **
-    I18nModule.forRootAsync({
-      useFactory: (configService: ConfigService) => ({
-        fallbackLanguage: configService.get<string>(ConfigKey.DEFAULT_LANG),
-        fallbacks: {
-          'en-*': 'en',
-        },
-        parserOptions: {
-          path: path.join(__dirname, '..', 'i18n'),
-          watch: true,
-        },
-      }),
-      parser: I18nJsonParser,
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      fallbacks: {
+        'en-*': 'en',
+      },
+      loaderOptions: {
+        path: path.join(__dirname, '..', 'i18n'),
+        watch: true,
+      },
       resolvers: [AcceptLanguageResolver],
-      inject: [ConfigService],
     }),
 
     ServeStaticModule.forRoot({
