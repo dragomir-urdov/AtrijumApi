@@ -2,7 +2,6 @@ export * from './product.entity';
 
 export * from './product-collection.entity';
 export * from './product-image.entity';
-export * from './product-translation.entity';
 
 export * from './product-variant.entity';
 export * from './variants/product-variant-base.entity';

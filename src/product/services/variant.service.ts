@@ -54,7 +54,7 @@ export class VariantService {
    */
   async getAll() {
     try {
-      const [stones, metals, shapes, styles] = await Promise.all([
+      const [stone, metal, shape, style] = await Promise.all([
         ProductStone.find(),
         ProductMetal.find(),
         ProductShape.find(),
@@ -62,10 +62,10 @@ export class VariantService {
       ]);
 
       return {
-        stones,
-        metals,
-        shapes,
-        styles,
+        stone,
+        metal,
+        shape,
+        style,
       };
     } catch (error) {
       throw new InternalServerErrorException();

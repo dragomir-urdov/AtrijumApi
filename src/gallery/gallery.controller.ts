@@ -21,6 +21,8 @@ import { Response } from 'express';
 // Services
 import { SharedService } from '@shared/services/shared.service';
 import { GalleryService } from './gallery.service';
+
+// Guards
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard';
 
 @Controller('gallery')
@@ -53,7 +55,7 @@ export class GalleryController {
     return res.sendFile(image, { root: `files/${album}` });
   }
 
-  @Post(':album') // -------------------------------------------------------------------
+  @Post(':album') // -----------------------------------------------------------
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FilesInterceptor('images', null, {

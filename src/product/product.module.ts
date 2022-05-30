@@ -18,7 +18,6 @@ import {
 // Entities
 import {
   Product,
-  ProductTranslation,
   ProductCollection,
   ProductImage,
   ProductVariant,
@@ -34,7 +33,6 @@ import {
   imports: [
     TypeOrmModule.forFeature([
       Product,
-      ProductTranslation,
       ProductCollection,
       ProductImage,
       ProductVariant,
