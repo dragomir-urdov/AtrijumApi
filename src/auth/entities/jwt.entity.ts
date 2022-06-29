@@ -12,7 +12,7 @@ import { User } from '@user/entities/user.entity';
 @Entity({
   name: 'user_jwt',
 })
-@Unique('device', ['os', 'platform', 'browser', 'user'])
+// @Unique('device', ['os', 'platform', 'browser', 'user'])
 export class Jwt extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;

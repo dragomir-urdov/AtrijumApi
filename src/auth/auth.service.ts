@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
@@ -13,6 +14,7 @@ import * as bcrypt from 'bcrypt';
 // Services
 import { UserService } from '@user/user.service';
 import { SharedService } from '@shared/services/shared.service';
+import { MailService } from '@mail/mail.service';
 
 // Decorators
 import { UserAgentData } from '@auth/decorators/user-agent.decorator';
@@ -34,6 +36,7 @@ export class AuthService {
     private readonly sharedService: SharedService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   /**
@@ -124,10 +127,13 @@ export class AuthService {
     user: UserCreateDto,
     userAgent: UserAgentData,
   ): Promise<UserResDto> {
+    console.log(user);
+
     const newUser = await this.userService.create(user);
 
     try {
       const jwtToken = await this.issueJwtToken(newUser, userAgent);
+      await this.mailService.sendUserConfirmation(newUser);
       return {
         jwt: {
           token: jwtToken,
@@ -270,5 +276,20 @@ export class AuthService {
     const expiresAt =
       (this.jwtService.decode(jwtToken) as JwtPayload).exp * 1000;
     return expiresAt;
+  }
+
+  async activateUser(secret: string) {
+    const res = await this.userService.update(
+      { activationSecret: secret },
+      { activationSecret: null },
+    );
+
+    if (res.affected) {
+      return {
+        message: 'User is successfully activated',
+      };
+    } else {
+      return new BadRequestException();
+    }
   }
 }

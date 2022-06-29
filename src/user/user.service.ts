@@ -32,9 +32,11 @@ export class UserService {
     }
 
     newUser.email = createUserDto.email;
+    newUser.username = createUserDto.username;
     newUser.password = createUserDto.password;
     newUser.firstName = createUserDto.firstName;
     newUser.lastName = createUserDto.lastName;
+    newUser.image = createUserDto.image;
 
     const savedUser = await User.save(newUser);
 
@@ -63,8 +65,8 @@ export class UserService {
    * @param user New user data.
    * @returns User data.
    */
-  async update(id: number, user: Partial<User>) {
-    return User.update(id, user);
+  async update(where: Partial<User>, user: Partial<User>) {
+    return User.update(where, user);
   }
 
   /**
@@ -73,7 +75,7 @@ export class UserService {
    * @author Dragomir Urdov
    * @param id User id.
    */
-  async delete(id: number) {
+  async delete(id: string) {
     return User.delete(id);
   }
 }

@@ -1,9 +1,12 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 
@@ -127,5 +130,10 @@ export class AuthController {
     @UserAgent() userAgent: UserAgentData,
   ): Promise<UserResDto> {
     return this.authService.refreshToken(user, userAgent);
+  }
+
+  @Get('activate-user')
+  async activateUser(@Query('token') secret: string) {
+    return this.authService.activateUser(secret);
   }
 }

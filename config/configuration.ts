@@ -22,10 +22,12 @@ export const configuration = () => ({
     supported: process.env.SUPPORTED_LANG.split(' '),
   },
 
-  sendgrid: {
-    apiKey: process.env.SENDGRID_API_KEY,
-    sender: process.env.SENDGRID_SENDER,
-    devMail: process.env.SENDGRID_DEV_MAIL,
+  mail: {
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT,
+    user: process.env.MAIL_USER,
+    password: process.env.MAIL_PASSWORD,
+    from: process.env.MAIL_FROM,
   },
 
   data: {
@@ -62,9 +64,11 @@ export const validationSchema = Joi.object({
   DEFAULT_LANG: Joi.string().default('en'),
   SUPPORTED_LANG: Joi.string().default('en'),
 
-  SENDGRID_API_KEY: Joi.string(),
-  SENDGRID_SENDER: Joi.string(),
-  SENDGRID_DEV_MAIL: Joi.string().optional(),
+  MAIL_HOST: Joi.string(),
+  MAIL_PORT: Joi.number(),
+  MAIL_USER: Joi.string(),
+  MAIL_PASSWORD: Joi.string(),
+  MAIL_FROM: Joi.string(),
 
   PAGE_SIZE: Joi.number().integer().default(20),
   FILE_DESTINATION: Joi.string(),
@@ -91,10 +95,12 @@ export enum ConfigKey {
   DEFAULT_LANG = 'lang.default',
   SUPPORTED_LANG = 'lang.supported',
 
-  // SENDGRID
-  SENDGRID_API_KEY = 'sendgrid.apiKey',
-  SENDGRID_SENDER = 'sendgrid.sender',
-  SENDGRID_DEV_MAIL = 'sendgrid.devMail',
+  // MAIL
+  MAIL_HOST = 'mail.host',
+  MAIL_PORT = 'mail.port',
+  MAIL_USER = 'mail.user',
+  MAIL_PASSWORD = 'mail.password',
+  MAIL_FROM = 'mail.from',
 
   PAGE_SIZE = 'data.pageSize',
   FILE_DESTINATION = 'file.dest',

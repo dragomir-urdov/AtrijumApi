@@ -6,7 +6,7 @@ export class JwtPayload {
   /**
    * User id.
    */
-  id: number;
+  id: string;
 
   /**
    * Initialized by Jwt itself.

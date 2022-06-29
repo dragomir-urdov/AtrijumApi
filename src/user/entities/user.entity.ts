@@ -4,7 +4,6 @@ import {
   BeforeUpdate,
   Column,
   Entity,
-  Index,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -14,25 +13,40 @@ import { Jwt } from '@auth/entities/jwt.entity';
 import { Product } from '@product/entities';
 
 import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity({
   name: 'user',
 })
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({
     nullable: false,
+    unique: true,
   })
-  @Index({ unique: true })
   email: string;
+
+  @Column({
+    unique: true,
+    nullable: false,
+  })
+  username: string;
 
   @Column({
     nullable: false,
   })
   @Exclude()
   password: string;
+
+  @Column({
+    nullable: true,
+    name: 'password_secret',
+    type: 'varchar',
+    length: 36,
+  })
+  passwordSecret?: string;
 
   @Column({
     name: 'first_name',
@@ -45,11 +59,30 @@ export class User extends BaseEntity {
   lastName: string;
 
   @Column({
+    nullable: true,
+  })
+  image?: string;
+
+  @Column({
     name: 'birth_date',
     type: 'date',
     nullable: true,
   })
   birthDate?: Date;
+
+  @Column({
+    nullable: true,
+    name: 'activation_secret',
+    type: 'varchar',
+    length: 36,
+  })
+  activationSecret?: string; // If null, then user activated account.
+
+  @Column({
+    default: false,
+    name: 'is_deleted',
+  })
+  isDeleted: boolean;
 
   @OneToMany(() => Jwt, (jwt) => jwt.user, {
     cascade: true,
@@ -66,6 +99,18 @@ export class User extends BaseEntity {
     if (this.password) {
       const salt = await bcrypt.genSalt();
       this.password = await bcrypt.hash(this.password, salt);
+    }
+  }
+
+  @BeforeInsert()
+  async generateActivationSecret() {
+    this.activationSecret = uuidv4();
+  }
+
+  @BeforeUpdate()
+  async generatePasswordSecret() {
+    if (this.password) {
+      this.passwordSecret = uuidv4();
     }
   }
 }

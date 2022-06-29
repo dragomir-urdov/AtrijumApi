@@ -9,7 +9,6 @@ import {
 import {
   IsDate,
   IsEmail,
-  IsNumber,
   IsOptional,
   IsString,
   MaxDate,
@@ -20,13 +19,17 @@ import { IsEqualTo } from '@shared/validators/is-equal-to.validator';
 import { JwtTokenDto } from '@auth/dto/jwt-payload.dto';
 
 class UserDto {
-  @IsNumber()
+  @IsString()
   @ApiProperty()
-  id: number;
+  id: string;
 
   @IsEmail()
   @ApiProperty()
   email: string;
+
+  @IsString()
+  @ApiProperty()
+  username: string;
 
   @IsString()
   @MinLength(8)
@@ -51,6 +54,11 @@ class UserDto {
   @MaxDate(new Date())
   @ApiPropertyOptional()
   birthDate?: Date;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional()
+  image?: string;
 }
 
 export class UserCreateDto extends OmitType(UserDto, ['id'] as const) {}
