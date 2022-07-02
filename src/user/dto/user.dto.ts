@@ -9,6 +9,7 @@ import {
 import {
   IsDate,
   IsEmail,
+  IsEnum,
   IsOptional,
   IsString,
   MaxDate,
@@ -17,6 +18,7 @@ import {
 import { IsEqualTo } from '@shared/validators/is-equal-to.validator';
 
 import { JwtTokenDto } from '@auth/dto/jwt-payload.dto';
+import { Role } from '@user/entities/user.entity';
 
 class UserDto {
   @IsString()
@@ -59,6 +61,10 @@ class UserDto {
   @IsString()
   @ApiPropertyOptional()
   image?: string;
+
+  @IsEnum(Role)
+  @ApiPropertyOptional()
+  role: Role;
 }
 
 export class UserCreateDto extends OmitType(UserDto, ['id'] as const) {}

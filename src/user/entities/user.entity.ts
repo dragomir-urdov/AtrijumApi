@@ -15,6 +15,12 @@ import { Product } from '@product/entities';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 
+export enum Role {
+  ADMIN = 'admin',
+  USER = 'user',
+  CREATOR = 'creator',
+}
+
 @Entity({
   name: 'user',
 })
@@ -62,6 +68,13 @@ export class User extends BaseEntity {
     nullable: true,
   })
   image?: string;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER,
+  })
+  role: Role;
 
   @Column({
     name: 'birth_date',

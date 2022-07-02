@@ -136,4 +136,10 @@ export class AuthController {
   async activateUser(@Query('token') secret: string) {
     return this.authService.activateUser(secret);
   }
+
+  @Get('resend-activation-mail')
+  @UseGuards(JwtAuthGuard)
+  async resendActivationMail(@UserData() user: User) {
+    return this.authService.resendActivationMail(user);
+  }
 }

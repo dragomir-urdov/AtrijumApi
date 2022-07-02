@@ -1,17 +1,19 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
-import { FindOneOptions } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 
 // Entities
 import { User } from '@user/entities/user.entity';
 
 // DTO
 import { UserCreateDto } from '@user/dto/user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+  ) {}
 
   /**
    * It insert new user in database if user not exists.

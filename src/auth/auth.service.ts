@@ -292,4 +292,10 @@ export class AuthService {
       return new BadRequestException();
     }
   }
+
+  async resendActivationMail(user: User) {
+    // const user = await this.userService.findOne({ where: { id: userId } });
+    // const res = await this.userService.update({ id: user.id }, user);
+    // return await this.mailService.sendUserConfirmation(newUser);
+  }
 }
